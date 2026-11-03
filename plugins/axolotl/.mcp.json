@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "axolotl": {
+      "command": "${CLAUDE_PLUGIN_ROOT}/bin/axolotl-mcp",
+      "args": []
+    }
+  }
+}

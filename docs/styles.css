@@ -408,6 +408,23 @@ section { position: relative; }
 .sync-points p { margin: 0; color: #b5adb9; font-size: 15.5px; }
 @media (max-width: 860px) { .sync-points { grid-template-columns: 1fr; gap: 36px; } }
 
+/* Agents */
+.agent-demo { font-size: 14.5px; }
+.agent-bar { display: flex; align-items: center; gap: 7px; padding: 14px 18px; border-bottom: 1px solid var(--line); background: var(--bg-sunk); }
+.agent-bar i { width: 11px; height: 11px; border-radius: 50%; background: var(--line-strong); }
+.agent-bar span { margin-left: 8px; font-size: 13px; font-weight: 600; color: var(--muted); }
+.agent-body { padding: 26px 26px 30px; display: grid; gap: 14px; }
+.agent-body p { margin: 0; }
+.agent-body .you { font-weight: 500; color: var(--ink); }
+.agent-body .you span { color: var(--accent); margin-right: 6px; }
+.agent-body .tool { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-family: var(--mono); font-size: 13px; color: var(--ink-2);
+  padding: 9px 12px; border-radius: 10px; background: var(--bg-sunk); border: 1px solid var(--line); }
+.agent-body .tool b { color: var(--accent); font-weight: 600; }
+.agent-body .tool code { color: var(--ink); background: none; }
+.agent-body .tool em { margin-left: auto; font-style: normal; color: var(--muted); font-family: var(--sans); font-size: 12.5px; }
+.agent-body .reply { color: var(--ink-2); line-height: 1.6; }
+.agent-body .reply u { text-decoration-color: color-mix(in srgb, var(--accent) 50%, transparent); text-underline-offset: 3px; }
+
 /* Download */
 .downloads { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
 .dl, .tile, .feature > * { min-width: 0; }

@@ -1,0 +1,10 @@
+{
+  "name": "axolotl",
+  "version": "1.3.0",
+  "description": "Search, read, write and organize your Axolotl notes from Claude Code.",
+  "author": { "name": "Josh Hamilton" },
+  "homepage": "https://nearbycoder.github.io/axolotl/",
+  "repository": "https://github.com/nearbycoder/axolotl",
+  "license": "MIT",
+  "keywords": ["notes", "markdown", "mcp", "axolotl"]
+}

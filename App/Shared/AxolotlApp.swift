@@ -3,7 +3,7 @@ import AxolotlKit
 
 @main
 struct AxolotlApp: App {
-    @State private var model = AppModel()
+    @State private var model = AppModel.shared
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some Scene {

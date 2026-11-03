@@ -1,0 +1,25 @@
+#!/bin/sh
+# Starts Axolotl's MCP server (it lives inside the app). Finds the app wherever it is installed.
+set -e
+
+for candidate in \
+  "${AXOLOTL_CLI:-}" \
+  "/Applications/Axolotl.app/Contents/Helpers/axolotl" \
+  "$HOME/Applications/Axolotl.app/Contents/Helpers/axolotl"; do
+  if [ -n "$candidate" ] && [ -x "$candidate" ]; then
+    exec "$candidate" mcp
+  fi
+done
+
+# Fall back to Spotlight, then to an `axolotl` already on PATH.
+app=$(mdfind "kMDItemCFBundleIdentifier == 'com.nearbycoder.axolotl'" 2>/dev/null | head -n 1)
+if [ -n "$app" ] && [ -x "$app/Contents/Helpers/axolotl" ]; then
+  exec "$app/Contents/Helpers/axolotl" mcp
+fi
+if command -v axolotl >/dev/null 2>&1; then
+  exec axolotl mcp
+fi
+
+echo "axolotl-mcp: couldn't find Axolotl. Install it from https://nearbycoder.github.io/axolotl/ (macOS)," >&2
+echo "or set AXOLOTL_CLI to the path of Axolotl.app/Contents/Helpers/axolotl." >&2
+exit 1

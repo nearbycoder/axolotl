@@ -1,5 +1,6 @@
 import SwiftUI
 import CoreImage.CIFilterBuiltins
+import AppIntents
 import UniformTypeIdentifiers
 import AxolotlKit
 
@@ -13,15 +14,17 @@ struct SettingsView: View {
             Form { AppearanceSettings() }.formStyle(.grouped).tabItem { Label("Appearance", systemImage: "paintpalette") }
             Form { SyncSettings() }.formStyle(.grouped).tabItem { Label("Sync", systemImage: "arrow.triangle.2.circlepath") }
             Form { SecuritySettings() }.formStyle(.grouped).tabItem { Label("Security", systemImage: "lock") }
+            Form { AgentSettings() }.formStyle(.grouped).tabItem { Label("Agents", systemImage: "sparkles") }
             Form { DataSettings(); AboutSection() }.formStyle(.grouped).tabItem { Label("Data", systemImage: "externaldrive") }
         }
-        .frame(width: 560, height: 560)
+        .frame(width: 600, height: 620)
         #else
         Form {
             Section {
                 NavigationLink { Form { AppearanceSettings() }.navigationTitle("Appearance") } label: { Label("Appearance", systemImage: "paintpalette") }
                 NavigationLink { Form { SyncSettings() }.navigationTitle("Sync") } label: { Label("Sync", systemImage: "arrow.triangle.2.circlepath") }
                 NavigationLink { Form { SecuritySettings() }.navigationTitle("Security") } label: { Label("Security", systemImage: "lock") }
+                NavigationLink { Form { AgentSettings() }.navigationTitle("Siri & Shortcuts") } label: { Label("Siri & Shortcuts", systemImage: "sparkles") }
                 NavigationLink { Form { DataSettings() }.navigationTitle("Import & Export") } label: { Label("Import & Export", systemImage: "externaldrive") }
             }
             GeneralSettings()
@@ -374,6 +377,124 @@ struct DataSettings: View {
         }, contentType: .zip, defaultFilename: exportURL?.lastPathComponent) { _ in }
         #endif
     }
+}
+
+/// Agent access: MCP and the command line on the Mac, Siri and Shortcuts everywhere.
+struct AgentSettings: View {
+    @Environment(AppModel.self) private var model
+    @State private var installMessage: String?
+    @State private var copied: String?
+
+    var body: some View {
+        @Bindable var s = model.settings
+        #if os(macOS)
+        Section {
+            Toggle("Allow agents and the command line", isOn: $s.agentAccess)
+                .onChange(of: s.agentAccess) { model.updateAgentServer() }
+            if s.agentAccess {
+                LabeledContent("Status") {
+                    Label(model.agentConnections == 0 ? "Ready" : "\(model.agentConnections) connected",
+                          systemImage: model.agentConnections == 0 ? "circle" : "circle.fill")
+                        .foregroundStyle(model.agentConnections == 0 ? Color.secondary : Color.green)
+                }
+            }
+        } header: {
+            Text("AI agents")
+        } footer: {
+            Text("Claude, Cursor and other agents that support the Model Context Protocol can search, read and edit your notes through the axolotl command. Only apps running as you on this Mac can connect, and every change appears in version history.")
+        }
+        if s.agentAccess {
+            Section {
+                Toggle("Allow access to locked notes while unlocked", isOn: $s.agentsReadLockedNotes)
+            } footer: {
+                Text("Off by default. When on, agents can read and edit locked notes only while you have unlocked them in Axolotl.")
+            }
+            Section("Connect an agent") {
+                snippet("Claude Code", "claude mcp add --scope user axolotl -- \"\(cliPath)\" mcp")
+                snippet("Claude Code plugin (server + skill)", "/plugin install axolotl --marketplace nearbycoder/axolotl")
+                snippet("Claude Desktop, Cursor and others", "{ \"mcpServers\": { \"axolotl\": { \"command\": \"\(cliPath)\", \"args\": [\"mcp\"] } } }")
+                HStack {
+                    Button("Install “axolotl” Command") { installCommand() }
+                    if let installMessage { Text(installMessage).font(.caption).foregroundStyle(.secondary) }
+                }
+            }
+            Section("Recent activity") {
+                if model.agentActivity.isEmpty {
+                    Text("Nothing yet.").foregroundStyle(.secondary)
+                }
+                ForEach(model.agentActivity.prefix(12)) { item in
+                    HStack(alignment: .firstTextBaseline) {
+                        Image(systemName: item.failed ? "exclamationmark.triangle.fill" : "checkmark.circle")
+                            .foregroundStyle(item.failed ? Color.orange : Color.secondary)
+                        VStack(alignment: .leading, spacing: 1) {
+                            Text(item.tool).font(.callout.monospaced())
+                            if !item.summary.isEmpty { Text(item.summary).font(.caption).foregroundStyle(.secondary).lineLimit(1) }
+                        }
+                        Spacer()
+                        VStack(alignment: .trailing, spacing: 1) {
+                            Text(item.client).font(.caption)
+                            Text(item.date, style: .time).font(.caption2).foregroundStyle(.tertiary)
+                        }
+                    }
+                }
+            }
+        }
+        #endif
+        Section {
+            Text("Ask Siri or use Shortcuts to create notes, add to a note or its todo list, search, open notes, get open todos, and pin, archive or tag notes.")
+                .foregroundStyle(.secondary)
+            #if os(iOS)
+            ShortcutsLink()
+            #endif
+        } header: {
+            Text("Siri & Shortcuts")
+        }
+    }
+
+    #if os(macOS)
+    private var cliPath: String { Bundle.main.bundleURL.appendingPathComponent("Contents/Helpers/axolotl").path }
+
+    private func snippet(_ title: String, _ text: String) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack {
+                Text(title).font(.callout.weight(.medium))
+                Spacer()
+                Button(copied == title ? "Copied" : "Copy") {
+                    copyToPasteboard(text)
+                    copied = title
+                }
+                .controlSize(.small)
+            }
+            Text(text).font(.caption.monospaced()).foregroundStyle(.secondary).textSelection(.enabled).lineLimit(3)
+        }
+        .padding(.vertical, 2)
+    }
+
+    /// Links `axolotl` into a folder on the user's PATH.
+    private func installCommand() {
+        let fm = FileManager.default
+        let home = fm.homeDirectoryForCurrentUser.path
+        let candidates = ["/usr/local/bin", "/opt/homebrew/bin", home + "/.local/bin"]
+        let path = ProcessInfo.processInfo.environment["PATH"] ?? ""
+        for dir in candidates {
+            if dir.hasPrefix(home) { try? fm.createDirectory(atPath: dir, withIntermediateDirectories: true) }
+            guard fm.isWritableFile(atPath: dir) else { continue }
+            let link = dir + "/axolotl"
+            if let dest = try? fm.destinationOfSymbolicLink(atPath: link) {
+                guard dest.hasSuffix("/Contents/Helpers/axolotl") else { continue }
+                try? fm.removeItem(atPath: link)
+            } else if fm.fileExists(atPath: link) {
+                continue
+            }
+            do {
+                try fm.createSymbolicLink(atPath: link, withDestinationPath: cliPath)
+                installMessage = "Installed at \(link)" + (path.split(separator: ":").contains(Substring(dir)) || dir != home + "/.local/bin" ? "" : ". Add ~/.local/bin to your PATH.")
+                return
+            } catch { continue }
+        }
+        installMessage = "Couldn't find a writable folder on your PATH. Use the full path above."
+    }
+    #endif
 }
 
 struct AboutSection: View {

@@ -88,6 +88,59 @@ New vaults are also limited to 10 per address per hour. Attachments stream to di
 - **Locked notes.** Note bodies are encrypted with a key derived from your password (PBKDF2-HMAC-SHA256, 600,000 rounds for vaults created from 1.2 on). Locking a note also removes its earlier plaintext history from every device. The title of a locked note stays visible, as in Bear.
 - **What it does not do.** There is no forward secrecy: anyone who learns the sync code can read everything synced with it, past and future. Rotate by creating a new vault. The relay can still see when and how much you sync, and it can withhold data.
 
+## Agents and automation
+
+Everything you can do in Axolotl, an AI agent can do too: search, read, write, edit, tag, manage todos,
+restore versions, attach files, export, change themes and sync. There are four ways in.
+
+**MCP (Mac).** Axolotl includes a [Model Context Protocol](https://modelcontextprotocol.io) server with
+35 tools. It works with Claude Code, Claude Desktop, Cursor, Windsurf, Zed, VS Code and any other MCP
+client. The server command is the `axolotl` tool inside the app:
+
+```sh
+# Claude Code
+claude mcp add --scope user axolotl -- /Applications/Axolotl.app/Contents/Helpers/axolotl mcp
+```
+
+```json
+// Claude Desktop, Cursor and others
+{ "mcpServers": { "axolotl": { "command": "/Applications/Axolotl.app/Contents/Helpers/axolotl", "args": ["mcp"] } } }
+```
+
+**Claude Code plugin.** Installs the MCP server plus an `axolotl-notes` skill that teaches Claude
+Axolotl's Markdown, tags, todos and search syntax. Inside Claude Code:
+
+```
+/plugin install axolotl --marketplace nearbycoder/axolotl
+```
+
+**Command line (Mac).** `axolotl` works on its own for scripts and shell agents. Install it on your PATH
+from **Settings → Agents**, then:
+
+```sh
+axolotl search '#work @todo'
+axolotl new --title "Idea" --tag ideas "Write it down."
+echo "- [ ] call back" | axolotl append "Meeting notes" --heading Actions
+axolotl todos
+axolotl call <tool> '{"note": "Shopping"}'    # any MCP tool, with --json output
+```
+
+**Siri, Shortcuts and Apple Intelligence (iPhone, iPad, Mac).** App Intents for creating notes, adding
+to notes and todo lists, searching, opening, reading, tagging, and pinning, archiving or trashing notes,
+with ready-made App Shortcuts such as “Create a note in Axolotl”.
+
+**How agents are kept in check**
+
+- Agent access goes through the running app over a Unix socket in your user folder (mode 0600, peer
+  uid checked), so only apps running as you on that Mac can connect. You can turn it off in **Settings → Agents**.
+- Every agent edit is saved as its own version, so you can undo it from Version History or with
+  `restore_revision`.
+- Locked notes stay hidden unless you allow agent access to them *and* have unlocked them in the app.
+  They are never matched by search and stay encrypted when an agent edits them.
+- Destructive tools (`delete_note_permanently`, `empty_trash`, `delete_tag`, `replace_note_text`) are
+  annotated as such, so clients can ask before running them. Security settings can't be changed by agents.
+- **Settings → Agents** shows every connected client and a log of what agents did.
+
 ## Install
 
 Grab the latest build from the [download page](https://nearbycoder.github.io/axolotl/) or [Releases](https://github.com/nearbycoder/axolotl/releases):
@@ -106,6 +159,8 @@ open Axolotl.xcodeproj         # run the Axolotl-macOS or Axolotl-iOS scheme
 # tests
 swift test --package-path Packages/AxolotlKit
 (cd server && npm test)
+xcodebuild test -project Axolotl.xcodeproj -scheme Axolotl-macOS -destination platform=macOS
+python3 scripts/test-mcp.py Axolotl.app/Contents/Helpers/axolotl   # MCP end to end, app running
 
 # release artifacts into dist/
 ./scripts/build-release.sh
@@ -115,6 +170,9 @@ swift test --package-path Packages/AxolotlKit
 
 ```
 App/Shared        SwiftUI app shared by macOS and iOS (editor, views, model)
+App/Shared/Agent  MCP server, agent tools, App Intents
+App/CLI           the `axolotl` command line tool and MCP stdio bridge
+plugins/axolotl   Claude Code plugin (MCP server + skill)
 App/iOS           iPhone/iPad-only pieces (sketching, scanning, QR)
 Packages/AxolotlKit  storage, sync engine, merge, crypto, search, Markdown → HTML
 server/           zero-dependency Node sync relay + Dockerfile
