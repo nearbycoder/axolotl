@@ -1,0 +1,41 @@
+{
+  "name": "Axolotl",
+  "identifier": "com.nearbycoder.axolotl.source",
+  "subtitle": "Markdown notes with private sync",
+  "website": "https://nearbycoder.github.io/axolotl/",
+  "iconURL": "https://nearbycoder.github.io/axolotl/img/glyph.png",
+  "tintColor": "#E8638B",
+  "apps": [
+    {
+      "name": "Axolotl",
+      "bundleIdentifier": "com.nearbycoder.axolotl",
+      "developerName": "Josh Hamilton",
+      "subtitle": "Markdown notes with private sync",
+      "localizedDescription": "A beautiful, private, Markdown-first notes app with tags, todos, wiki links, locked notes, themes and end-to-end encrypted sync between your devices.",
+      "iconURL": "https://nearbycoder.github.io/axolotl/img/glyph.png",
+      "tintColor": "#E8638B",
+      "category": "productivity",
+      "screenshots": ["https://nearbycoder.github.io/axolotl/img/iphone.jpg"],
+      "versions": [
+        {
+          "version": "1.0.0",
+          "buildVersion": "1",
+          "date": "2026-11-03",
+          "localizedDescription": "First release.",
+          "downloadURL": "https://github.com/nearbycoder/axolotl/releases/download/v1.0.0/Axolotl-iOS.ipa",
+          "size": 1822098,
+          "minOSVersion": "17.0"
+        }
+      ],
+      "appPermissions": {
+        "entitlements": [],
+        "privacy": {
+          "NSLocalNetworkUsageDescription": "Axolotl finds your other devices on this network to sync notes directly and privately.",
+          "NSFaceIDUsageDescription": "Axolotl uses Face ID to unlock the app and your locked notes.",
+          "NSCameraUsageDescription": "Axolotl uses the camera to scan documents and sync-code QR codes."
+        }
+      }
+    }
+  ],
+  "news": []
+}

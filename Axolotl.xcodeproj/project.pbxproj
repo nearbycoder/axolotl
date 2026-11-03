@@ -1,0 +1,597 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		00567FEEEE1185906FAB80E3 /* ExportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85433EC6724D2B3A51B758A2 /* ExportService.swift */; };
+		09215176001FB4670D0DC696 /* AxolotlKit in Frameworks */ = {isa = PBXBuildFile; productRef = F5692246749AD51597BF7CCB /* AxolotlKit */; };
+		0955ED1440B5C7B057D12AD9 /* NoteListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5997A5D49C88881FCEFF3EBD /* NoteListView.swift */; };
+		0A8DF8D0767689AC0C543209 /* Platform.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D2D8FD8BECDB17CB41059CE /* Platform.swift */; };
+		0F3FE4AFDBEF85F58DD5DB28 /* iOSViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 348E23E94BAFB060E4DF82AA /* iOSViews.swift */; };
+		19A03C07A097153BF2702248 /* AxolotlApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D5E54F4609B518F1138FA8D /* AxolotlApp.swift */; };
+		1F08699DBA52F271918F7F28 /* Security.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E93DB4C8DA8275FF6B647F /* Security.swift */; };
+		24964684066D2D567DCBA8BD /* SidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 322021725E46FD9A85300C3C /* SidebarView.swift */; };
+		2BC0EE38891735F8B3794E3D /* MarkdownHighlighter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 089E7666C4BD0C5F071BE981 /* MarkdownHighlighter.swift */; };
+		31C6AD8FF0DBD215E514C741 /* Security.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E93DB4C8DA8275FF6B647F /* Security.swift */; };
+		36F207CAC25618D113DB9E0F /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D3E404D3D4FA6249E379A92 /* RootView.swift */; };
+		51C29219FC193B79199F9660 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE53FC7008F44AE1D49BA776 /* SettingsView.swift */; };
+		57B13EB5CD414B6151A5E8EB /* ExportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85433EC6724D2B3A51B758A2 /* ExportService.swift */; };
+		5AEC4B8C9A6906B683DAED2D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6B2FC3E1C8473335DD3CDC9F /* Assets.xcassets */; };
+		5F8794A220B1FAE9502C7863 /* EditorCore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 296B7D8BC98C7017233588B0 /* EditorCore.swift */; };
+		6369C7FC01B9DBCAE62C5E52 /* AxolotlKit in Frameworks */ = {isa = PBXBuildFile; productRef = D9778CFBEE49A1DAC44D61A9 /* AxolotlKit */; };
+		65DDD31BA5F870BB6365C384 /* EditorCore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 296B7D8BC98C7017233588B0 /* EditorCore.swift */; };
+		726B9EDB4EE66A1E40E8612E /* Platform.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D2D8FD8BECDB17CB41059CE /* Platform.swift */; };
+		778DCFE0492D535E698AD876 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE53FC7008F44AE1D49BA776 /* SettingsView.swift */; };
+		7B1337C037A556C8E54F071B /* AxolotlApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D5E54F4609B518F1138FA8D /* AxolotlApp.swift */; };
+		89D06C628E2AE3A7FAE48C7D /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6999B1910336815B52722938 /* Theme.swift */; };
+		8C43C44F11F1C087B5FE3F51 /* MarkdownHighlighter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 089E7666C4BD0C5F071BE981 /* MarkdownHighlighter.swift */; };
+		8FD089D9DE94E2F2798D0661 /* QuickOpenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC6B1F2DC76EE9F3918E1DBB /* QuickOpenView.swift */; };
+		93FE7AC480EFD7B6AD086E24 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6999B1910336815B52722938 /* Theme.swift */; };
+		A4AE8F0657164E02C45C1333 /* EditorScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2269DF5A7630468AF1CBA7A7 /* EditorScreen.swift */; };
+		A61D0ECFF709AEDA3A207A74 /* EditorScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2269DF5A7630468AF1CBA7A7 /* EditorScreen.swift */; };
+		AA18E90D757DE8E2677E15CA /* NoteListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5997A5D49C88881FCEFF3EBD /* NoteListView.swift */; };
+		AAFDD7676494289689D9B1ED /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6B2FC3E1C8473335DD3CDC9F /* Assets.xcassets */; };
+		B671095AC069373F216B9B09 /* SidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 322021725E46FD9A85300C3C /* SidebarView.swift */; };
+		BF50EA7C9EF5D22244C4A8AC /* MarkdownEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A718098C2E963DCE068D431 /* MarkdownEditor.swift */; };
+		D0A151636D58A7C98931B727 /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7192BEAFCCDC9EAB94170D70 /* AppModel.swift */; };
+		DCD591CA2CCB7BE6787F6764 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D3E404D3D4FA6249E379A92 /* RootView.swift */; };
+		DF70F18D301319688E3C26D6 /* QuickOpenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC6B1F2DC76EE9F3918E1DBB /* QuickOpenView.swift */; };
+		F6F675FD9184744608395B6E /* MarkdownEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A718098C2E963DCE068D431 /* MarkdownEditor.swift */; };
+		FDD6E577C45CD2D404B2CCC8 /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7192BEAFCCDC9EAB94170D70 /* AppModel.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		089E7666C4BD0C5F071BE981 /* MarkdownHighlighter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownHighlighter.swift; sourceTree = "<group>"; };
+		0A718098C2E963DCE068D431 /* MarkdownEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownEditor.swift; sourceTree = "<group>"; };
+		0D5E54F4609B518F1138FA8D /* AxolotlApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AxolotlApp.swift; sourceTree = "<group>"; };
+		0DFCDC0E4F8E27040863DB68 /* AxolotlKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = AxolotlKit; path = Packages/AxolotlKit; sourceTree = SOURCE_ROOT; };
+		2269DF5A7630468AF1CBA7A7 /* EditorScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorScreen.swift; sourceTree = "<group>"; };
+		296B7D8BC98C7017233588B0 /* EditorCore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorCore.swift; sourceTree = "<group>"; };
+		322021725E46FD9A85300C3C /* SidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarView.swift; sourceTree = "<group>"; };
+		348E23E94BAFB060E4DF82AA /* iOSViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iOSViews.swift; sourceTree = "<group>"; };
+		36AFFD7885D789122E77FECF /* Axolotl-iOS.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = "Axolotl-iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		531D4E2FA4C971A25D3661F1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		5997A5D49C88881FCEFF3EBD /* NoteListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteListView.swift; sourceTree = "<group>"; };
+		5D2D8FD8BECDB17CB41059CE /* Platform.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Platform.swift; sourceTree = "<group>"; };
+		6999B1910336815B52722938 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
+		6B2FC3E1C8473335DD3CDC9F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		70E93DB4C8DA8275FF6B647F /* Security.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Security.swift; sourceTree = "<group>"; };
+		7192BEAFCCDC9EAB94170D70 /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
+		7D3E404D3D4FA6249E379A92 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		85433EC6724D2B3A51B758A2 /* ExportService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportService.swift; sourceTree = "<group>"; };
+		BA58ED539F2E250DA30ED4A6 /* Axolotl-macOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Axolotl-macOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		D8842F2D9E22DB64111B325D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		EC6B1F2DC76EE9F3918E1DBB /* QuickOpenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickOpenView.swift; sourceTree = "<group>"; };
+		EE53FC7008F44AE1D49BA776 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		6A3440DAB0BF8349046EA9E1 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6369C7FC01B9DBCAE62C5E52 /* AxolotlKit in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A91C36F1599E3D68F5475D97 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				09215176001FB4670D0DC696 /* AxolotlKit in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		15F08EB25B41E9D9A3FB97D8 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				1CD59CD1EDD7E950EF8DF532 /* iOS */,
+				6AB9CC6F859A263F204C2247 /* macOS */,
+				8218E8035D935893A5E2F09A /* Shared */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		1CD59CD1EDD7E950EF8DF532 /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				531D4E2FA4C971A25D3661F1 /* Info.plist */,
+				348E23E94BAFB060E4DF82AA /* iOSViews.swift */,
+			);
+			path = iOS;
+			sourceTree = "<group>";
+		};
+		4B48F1FFE0C49F0AAB1768BB /* Editor */ = {
+			isa = PBXGroup;
+			children = (
+				296B7D8BC98C7017233588B0 /* EditorCore.swift */,
+				0A718098C2E963DCE068D431 /* MarkdownEditor.swift */,
+				089E7666C4BD0C5F071BE981 /* MarkdownHighlighter.swift */,
+			);
+			path = Editor;
+			sourceTree = "<group>";
+		};
+		6AB9CC6F859A263F204C2247 /* macOS */ = {
+			isa = PBXGroup;
+			children = (
+				D8842F2D9E22DB64111B325D /* Info.plist */,
+			);
+			path = macOS;
+			sourceTree = "<group>";
+		};
+		6E2CF172B4230DCFC76B7BA3 = {
+			isa = PBXGroup;
+			children = (
+				15F08EB25B41E9D9A3FB97D8 /* App */,
+				B4B47807895CBF530E0A6B29 /* Packages */,
+				D1F93E8C32B466294E26E099 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		8218E8035D935893A5E2F09A /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				7192BEAFCCDC9EAB94170D70 /* AppModel.swift */,
+				6B2FC3E1C8473335DD3CDC9F /* Assets.xcassets */,
+				0D5E54F4609B518F1138FA8D /* AxolotlApp.swift */,
+				85433EC6724D2B3A51B758A2 /* ExportService.swift */,
+				5D2D8FD8BECDB17CB41059CE /* Platform.swift */,
+				70E93DB4C8DA8275FF6B647F /* Security.swift */,
+				6999B1910336815B52722938 /* Theme.swift */,
+				4B48F1FFE0C49F0AAB1768BB /* Editor */,
+				92D2DC406201F586CC33A745 /* Views */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		92D2DC406201F586CC33A745 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				2269DF5A7630468AF1CBA7A7 /* EditorScreen.swift */,
+				5997A5D49C88881FCEFF3EBD /* NoteListView.swift */,
+				EC6B1F2DC76EE9F3918E1DBB /* QuickOpenView.swift */,
+				7D3E404D3D4FA6249E379A92 /* RootView.swift */,
+				EE53FC7008F44AE1D49BA776 /* SettingsView.swift */,
+				322021725E46FD9A85300C3C /* SidebarView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		B4B47807895CBF530E0A6B29 /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				0DFCDC0E4F8E27040863DB68 /* AxolotlKit */,
+			);
+			path = Packages;
+			sourceTree = "<group>";
+		};
+		D1F93E8C32B466294E26E099 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				36AFFD7885D789122E77FECF /* Axolotl-iOS.app */,
+				BA58ED539F2E250DA30ED4A6 /* Axolotl-macOS.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		61AE20D5C3EED8FEC67F9DBC /* Axolotl-macOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B6B28DB13B3D9FB29242DDDF /* Build configuration list for PBXNativeTarget "Axolotl-macOS" */;
+			buildPhases = (
+				7309F42852A92FEA77E7D0AB /* Sources */,
+				0DE05FAF6E0B7F9C3E38071E /* Resources */,
+				A91C36F1599E3D68F5475D97 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "Axolotl-macOS";
+			packageProductDependencies = (
+				F5692246749AD51597BF7CCB /* AxolotlKit */,
+			);
+			productName = "Axolotl-macOS";
+			productReference = BA58ED539F2E250DA30ED4A6 /* Axolotl-macOS.app */;
+			productType = "com.apple.product-type.application";
+		};
+		F03659CDC24E251CD7D937A1 /* Axolotl-iOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DB3A482B46EBE24267FD3B2C /* Build configuration list for PBXNativeTarget "Axolotl-iOS" */;
+			buildPhases = (
+				AC01B8EEC7E8667A54C437D7 /* Sources */,
+				A7CD20DC22A1F7DE9C586E28 /* Resources */,
+				6A3440DAB0BF8349046EA9E1 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "Axolotl-iOS";
+			packageProductDependencies = (
+				D9778CFBEE49A1DAC44D61A9 /* AxolotlKit */,
+			);
+			productName = "Axolotl-iOS";
+			productReference = 36AFFD7885D789122E77FECF /* Axolotl-iOS.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		539D36E49EA0C9D33DEC41E8 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					61AE20D5C3EED8FEC67F9DBC = {
+						DevelopmentTeam = 4F2YLTHL8T;
+						ProvisioningStyle = Manual;
+					};
+					F03659CDC24E251CD7D937A1 = {
+						DevelopmentTeam = 4F2YLTHL8T;
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = EDF22031ADF6AE89733849E4 /* Build configuration list for PBXProject "Axolotl" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 6E2CF172B4230DCFC76B7BA3;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				E690509689C08F060390CF15 /* XCLocalSwiftPackageReference "Packages/AxolotlKit" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = D1F93E8C32B466294E26E099 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				F03659CDC24E251CD7D937A1 /* Axolotl-iOS */,
+				61AE20D5C3EED8FEC67F9DBC /* Axolotl-macOS */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		0DE05FAF6E0B7F9C3E38071E /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AAFDD7676494289689D9B1ED /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A7CD20DC22A1F7DE9C586E28 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5AEC4B8C9A6906B683DAED2D /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		7309F42852A92FEA77E7D0AB /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D0A151636D58A7C98931B727 /* AppModel.swift in Sources */,
+				7B1337C037A556C8E54F071B /* AxolotlApp.swift in Sources */,
+				65DDD31BA5F870BB6365C384 /* EditorCore.swift in Sources */,
+				A61D0ECFF709AEDA3A207A74 /* EditorScreen.swift in Sources */,
+				57B13EB5CD414B6151A5E8EB /* ExportService.swift in Sources */,
+				F6F675FD9184744608395B6E /* MarkdownEditor.swift in Sources */,
+				8C43C44F11F1C087B5FE3F51 /* MarkdownHighlighter.swift in Sources */,
+				AA18E90D757DE8E2677E15CA /* NoteListView.swift in Sources */,
+				726B9EDB4EE66A1E40E8612E /* Platform.swift in Sources */,
+				8FD089D9DE94E2F2798D0661 /* QuickOpenView.swift in Sources */,
+				36F207CAC25618D113DB9E0F /* RootView.swift in Sources */,
+				31C6AD8FF0DBD215E514C741 /* Security.swift in Sources */,
+				51C29219FC193B79199F9660 /* SettingsView.swift in Sources */,
+				B671095AC069373F216B9B09 /* SidebarView.swift in Sources */,
+				89D06C628E2AE3A7FAE48C7D /* Theme.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AC01B8EEC7E8667A54C437D7 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				FDD6E577C45CD2D404B2CCC8 /* AppModel.swift in Sources */,
+				19A03C07A097153BF2702248 /* AxolotlApp.swift in Sources */,
+				5F8794A220B1FAE9502C7863 /* EditorCore.swift in Sources */,
+				A4AE8F0657164E02C45C1333 /* EditorScreen.swift in Sources */,
+				00567FEEEE1185906FAB80E3 /* ExportService.swift in Sources */,
+				BF50EA7C9EF5D22244C4A8AC /* MarkdownEditor.swift in Sources */,
+				2BC0EE38891735F8B3794E3D /* MarkdownHighlighter.swift in Sources */,
+				0955ED1440B5C7B057D12AD9 /* NoteListView.swift in Sources */,
+				0A8DF8D0767689AC0C543209 /* Platform.swift in Sources */,
+				DF70F18D301319688E3C26D6 /* QuickOpenView.swift in Sources */,
+				DCD591CA2CCB7BE6787F6764 /* RootView.swift in Sources */,
+				1F08699DBA52F271918F7F28 /* Security.swift in Sources */,
+				778DCFE0492D535E698AD876 /* SettingsView.swift in Sources */,
+				24964684066D2D567DCBA8BD /* SidebarView.swift in Sources */,
+				93FE7AC480EFD7B6AD086E24 /* Theme.swift in Sources */,
+				0F3FE4AFDBEF85F58DD5DB28 /* iOSViews.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		1AA392560C158D59EF59A268 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_HARDENED_RUNTIME = NO;
+				INFOPLIST_FILE = App/macOS/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.nearbycoder.axolotl;
+				PRODUCT_NAME = Axolotl;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		1FD6629CA0F58253AAA229FD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				INFOPLIST_FILE = App/iOS/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.nearbycoder.axolotl;
+				PRODUCT_NAME = Axolotl;
+				SDKROOT = iphoneos;
+				SUPPORTS_MACCATALYST = NO;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		21244219820F6005822FDDDE /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = 4F2YLTHL8T;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		2B5D39570EF5BD6693FD35B5 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_HARDENED_RUNTIME = NO;
+				INFOPLIST_FILE = App/macOS/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.nearbycoder.axolotl;
+				PRODUCT_NAME = Axolotl;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		361139E474C056900B8BAA0A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = 4F2YLTHL8T;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		6D93F817308EFA854DCD1265 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				INFOPLIST_FILE = App/iOS/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.nearbycoder.axolotl;
+				PRODUCT_NAME = Axolotl;
+				SDKROOT = iphoneos;
+				SUPPORTS_MACCATALYST = NO;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		B6B28DB13B3D9FB29242DDDF /* Build configuration list for PBXNativeTarget "Axolotl-macOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1AA392560C158D59EF59A268 /* Debug */,
+				2B5D39570EF5BD6693FD35B5 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		DB3A482B46EBE24267FD3B2C /* Build configuration list for PBXNativeTarget "Axolotl-iOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1FD6629CA0F58253AAA229FD /* Debug */,
+				6D93F817308EFA854DCD1265 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		EDF22031ADF6AE89733849E4 /* Build configuration list for PBXProject "Axolotl" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				361139E474C056900B8BAA0A /* Debug */,
+				21244219820F6005822FDDDE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		E690509689C08F060390CF15 /* XCLocalSwiftPackageReference "Packages/AxolotlKit" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/AxolotlKit;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		D9778CFBEE49A1DAC44D61A9 /* AxolotlKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = AxolotlKit;
+		};
+		F5692246749AD51597BF7CCB /* AxolotlKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = AxolotlKit;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 539D36E49EA0C9D33DEC41E8 /* Project object */;
+}

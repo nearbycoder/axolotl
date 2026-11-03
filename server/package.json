@@ -1,0 +1,14 @@
+{
+  "name": "axolotl-sync",
+  "version": "1.0.0",
+  "description": "End-to-end encrypted sync relay for the Axolotl notes app",
+  "type": "module",
+  "main": "server.mjs",
+  "bin": { "axolotl-sync": "server.mjs" },
+  "engines": { "node": ">=22.13" },
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node --test test.mjs"
+  },
+  "license": "MIT"
+}

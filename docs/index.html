@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Axolotl — Markdown notes for Mac, iPhone & iPad</title>
+<meta name="description" content="Axolotl is a beautiful, private, Markdown-first notes app for Mac, iPhone and iPad with end-to-end encrypted sync between your devices. Free and open source.">
+<meta property="og:title" content="Axolotl — Markdown notes for Mac, iPhone & iPad">
+<meta property="og:description" content="Write beautifully. Sync privately. Free and open source.">
+<meta property="og:image" content="https://nearbycoder.github.io/axolotl/img/mac.jpg">
+<link rel="icon" type="image/png" href="img/favicon.png">
+<link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,650&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fffaf6; --bg-2: #fbf1ee; --card: #ffffff; --ink: #2a2430; --muted: #6f6574; --line: #eadfdc;
+    --pink: #e8638b; --pink-soft: #fde4ec; --teal: #0f766e; --teal-soft: #d6f3ef; --shadow: 0 30px 60px -30px rgba(70, 30, 50, .35);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #17141a; --bg-2: #1f1b23; --card: #241f29; --ink: #f2ecf4; --muted: #a99fae; --line: #352d3b;
+            --pink: #f28aa9; --pink-soft: #3a2230; --teal: #4fd1c0; --teal-soft: #14302d; --shadow: 0 30px 60px -30px rgba(0,0,0,.7); }
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 17px/1.6 Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; -webkit-font-smoothing: antialiased; }
+  a { color: var(--pink); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  img { max-width: 100%; display: block; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+  h1, h2, h3 { font-family: Fraunces, Georgia, serif; font-weight: 650; letter-spacing: -0.02em; line-height: 1.1; margin: 0; }
+  h2 { font-size: clamp(30px, 4vw, 44px); }
+  h3 { font-size: 21px; font-weight: 500; letter-spacing: -0.01em; }
+  code { font: 0.85em ui-monospace, SFMono-Regular, Menlo, monospace; background: var(--pink-soft); color: var(--pink); padding: .12em .4em; border-radius: 6px; }
+
+  nav { position: sticky; top: 0; z-index: 10; backdrop-filter: saturate(1.4) blur(14px); -webkit-backdrop-filter: saturate(1.4) blur(14px); background: color-mix(in srgb, var(--bg) 82%, transparent); border-bottom: 1px solid var(--line); }
+  nav .wrap { display: flex; align-items: center; gap: 24px; height: 62px; }
+  .brand { display: flex; align-items: center; gap: 10px; color: var(--ink); font-weight: 600; font-size: 18px; }
+  .brand img { width: 32px; height: 32px; border-radius: 8px; }
+  nav .links { margin-left: auto; display: flex; gap: 22px; font-size: 15px; }
+  nav .links a { color: var(--muted); }
+  nav .links a:hover { color: var(--ink); text-decoration: none; }
+  @media (max-width: 640px) { nav .links a:not(.gh) { display: none; } }
+
+  .hero { padding: 72px 0 40px; text-align: center; overflow: hidden; }
+  .hero .icon { width: 120px; height: 120px; margin: 0 auto 26px; filter: drop-shadow(0 18px 30px rgba(15, 118, 110, .35)); }
+  .hero h1 { font-size: clamp(44px, 7vw, 82px); }
+  .hero h1 em { font-style: italic; color: var(--pink); }
+  .hero p.lead { font-size: clamp(18px, 2.2vw, 22px); color: var(--muted); max-width: 640px; margin: 20px auto 32px; }
+  .cta { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .btn { display: inline-flex; align-items: center; gap: 10px; padding: 14px 22px; border-radius: 14px; font-weight: 600; font-size: 16px; border: 1px solid var(--line); background: var(--card); color: var(--ink); transition: transform .15s ease, box-shadow .15s ease; }
+  .btn:hover { text-decoration: none; transform: translateY(-1px); box-shadow: 0 10px 24px -14px rgba(0,0,0,.4); }
+  .btn.primary { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  .btn svg { width: 20px; height: 20px; }
+  .meta { margin-top: 16px; font-size: 14px; color: var(--muted); }
+
+  .showcase { position: relative; margin: 56px auto 0; max-width: 1060px; padding: 0 0 40px; }
+  .showcase .mac { border-radius: 14px; box-shadow: var(--shadow); border: 1px solid var(--line); overflow: hidden; }
+  .showcase .phone { position: absolute; right: -10px; bottom: 0; width: 23%; border-radius: 34px; overflow: hidden; border: 8px solid #111; box-shadow: var(--shadow); background: #111; }
+  @media (max-width: 720px) { .showcase .phone { width: 34%; right: 0; border-width: 5px; border-radius: 24px; } }
+
+  section { padding: 88px 0; }
+  section.alt { background: var(--bg-2); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .eyebrow { text-transform: uppercase; letter-spacing: .12em; font-size: 13px; font-weight: 600; color: var(--teal); margin-bottom: 12px; }
+  .section-head { max-width: 720px; margin-bottom: 44px; }
+  .section-head p { color: var(--muted); font-size: 19px; margin: 16px 0 0; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 18px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 24px; }
+  .card .ic { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; background: var(--pink-soft); color: var(--pink); margin-bottom: 16px; }
+  .card .ic svg { width: 22px; height: 22px; }
+  .card:nth-child(3n+2) .ic { background: var(--teal-soft); color: var(--teal); }
+  .card p { color: var(--muted); margin: 8px 0 0; font-size: 15.5px; }
+
+  .split { display: grid; grid-template-columns: 1.05fr 1fr; gap: 56px; align-items: center; }
+  @media (max-width: 880px) { .split { grid-template-columns: 1fr; } }
+  .ipad { border-radius: 22px; overflow: hidden; border: 10px solid #111; box-shadow: var(--shadow); background: #111; max-width: 520px; margin: 0 auto; }
+  ul.checks { list-style: none; padding: 0; margin: 24px 0 0; }
+  ul.checks li { padding: 9px 0 9px 32px; position: relative; border-bottom: 1px dashed var(--line); }
+  ul.checks li::before { content: "✓"; position: absolute; left: 0; top: 12px; width: 20px; height: 20px; border-radius: 6px; background: var(--pink); color: #fff; font-size: 12px; font-weight: 700; display: grid; place-items: center; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
+  .chips code { font-size: 14px; background: var(--card); color: var(--ink); border: 1px solid var(--line); padding: 6px 10px; border-radius: 9px; }
+  .chips code b { color: var(--pink); font-weight: 600; }
+
+  .diagram { background: var(--card); border: 1px solid var(--line); border-radius: 22px; padding: 18px; }
+  .diagram svg { width: 100%; height: auto; display: block; }
+  .diagram text { font-family: Inter, sans-serif; fill: var(--ink); }
+  .diagram .sub { fill: var(--muted); font-size: 12px; }
+
+  .downloads { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+  .dl { background: var(--card); border: 1px solid var(--line); border-radius: 22px; padding: 28px; display: flex; flex-direction: column; }
+  .dl .platform { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
+  .dl .platform svg { width: 28px; height: 28px; color: var(--ink); }
+  .dl .req { color: var(--muted); font-size: 14px; margin: 0 0 18px; }
+  .dl .actions { display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; }
+  .dl .actions .btn { justify-content: center; }
+  .dl details { font-size: 14.5px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 14px; margin-top: auto; }
+  .dl summary { cursor: pointer; color: var(--ink); font-weight: 500; }
+  pre { background: var(--bg-2); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; overflow-x: auto; font: 13.5px/1.55 ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--ink); }
+
+  footer { padding: 48px 0 64px; color: var(--muted); font-size: 14.5px; border-top: 1px solid var(--line); }
+  footer .wrap { display: flex; gap: 20px; flex-wrap: wrap; align-items: center; justify-content: space-between; }
+</style>
+</head>
+<body>
+<nav>
+  <div class="wrap">
+    <a class="brand" href="#"><img src="img/glyph.png" alt=""> Axolotl</a>
+    <div class="links">
+      <a href="#features">Features</a>
+      <a href="#sync">Sync</a>
+      <a href="#download">Download</a>
+      <a class="gh" href="https://github.com/nearbycoder/axolotl">GitHub</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <img class="icon" src="img/icon.png" alt="Axolotl app icon">
+    <h1>Write beautifully.<br><em>Sync privately.</em></h1>
+    <p class="lead">Axolotl is a Markdown-first notes app for Mac, iPhone and iPad. It's fast and focused, with tags, todos and linked notes, and your notes sync between devices end-to-end encrypted.</p>
+    <div class="cta">
+      <a class="btn primary" href="https://github.com/nearbycoder/axolotl/releases/latest/download/Axolotl-macOS.dmg">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.37 12.6c-.02-2.3 1.88-3.4 1.96-3.46-1.07-1.56-2.73-1.78-3.32-1.8-1.41-.14-2.76.83-3.48.83-.72 0-1.82-.81-3-.79-1.54.02-2.96.9-3.76 2.27-1.6 2.78-.41 6.9 1.15 9.16.76 1.1 1.67 2.34 2.86 2.3 1.15-.05 1.58-.74 2.97-.74 1.38 0 1.77.74 2.99.72 1.24-.02 2.02-1.12 2.77-2.23.88-1.28 1.24-2.52 1.26-2.59-.03-.01-2.4-.92-2.42-3.67zM14.1 5.86c.63-.77 1.06-1.83.94-2.89-.91.04-2.02.61-2.67 1.37-.58.67-1.1 1.76-.96 2.8 1.02.08 2.06-.52 2.69-1.28z"/></svg>
+        Download for Mac
+      </a>
+      <a class="btn" href="#download">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="6" y="2.5" width="12" height="19" rx="3"/><path d="M10.5 18.5h3"/></svg>
+        iPhone &amp; iPad
+      </a>
+    </div>
+    <p class="meta"><span id="version">Latest release</span> · Free &amp; open source · macOS 14+ · iOS &amp; iPadOS 17+</p>
+
+    <div class="showcase">
+      <img class="mac" src="img/mac.jpg" alt="Axolotl on the Mac with the sidebar, note list and editor">
+      <img class="phone" src="img/iphone.jpg" alt="Axolotl on iPhone in the Dark Graphite theme">
+    </div>
+  </div>
+</header>
+
+<section id="features" class="alt">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">Features</div>
+      <h2>Everything you need to think in text.</h2>
+      <p>Write in plain Markdown, see it styled as you type, and keep it organized without any extra effort.</p>
+    </div>
+    <div class="grid">
+      <div class="card"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7V5h16v2M9 19h6M12 5v14"/></svg></div><h3>Live Markdown</h3><p>Headings, bold, italic, highlights, callouts, tables, code blocks with syntax colors, styled in place while you type.</p></div>
+      <div class="card"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 9h14M4 15h14M10 3 8 21M16 3l-2 18"/></svg></div><h3>Nested tags</h3><p>Type <code>#work/projects</code> anywhere to organize. Tags get icons, can be pinned, renamed and nested as deep as you like.</p></div>
+      <div class="card"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg></div><h3>Linked notes</h3><p><code>[[Wiki links]]</code> with autocomplete, plus backlinks and outgoing links in the info panel.</p></div>
+      <div class="card"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="5"/><path d="m8 12 3 3 5-6"/></svg></div><h3>Todos that count</h3><p>Real checkboxes, progress in the note list, and a Todo section that collects every unfinished task.</p></div>
+      <div class="card"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></div><h3>Powerful search</h3><p>Phrases, exclusions, tags and filters like <code>@todo</code>, <code>@today</code>, <code>@images</code> and <code>@date(&gt;2025-01-01)</code>. Text in photos is searchable too.</p></div>
+      <div class="card"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="10" width="16" height="11" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></div><h3>Locked notes</h3><p>Encrypt individual notes with AES-256 and unlock with Face ID or Touch ID, or lock the whole app.</p></div>
+      <div class="card"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"/></svg></div><h3>16 themes</h3><p>Red Graphite, Dracula, Nord, Solarized, Tokyo Night, Gruvbox, Catppuccin, Rosé Pine and more, plus fonts, sizes and line width.</p></div>
+      <div class="card"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg></div><h3>Export anywhere</h3><p>Markdown, TextBundle, HTML, PDF, RTF, Word and plain text, or export your whole library as a zip. Imports from Bear and other Markdown apps.</p></div>
+      <div class="card"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="14" rx="3"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5-8 8"/></svg></div><h3>Images &amp; files</h3><p>Paste, drop or pick photos and files. Sketch with Apple Pencil and scan documents on iPhone and iPad.</p></div>
+      <div class="card"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div><h3>Version history</h3><p>Every change is kept as a revision. Browse older versions of a note and restore one with a tap.</p></div>
+      <div class="card"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2.5" y="6" width="19" height="12" rx="2.5"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/></svg></div><h3>Keyboard first</h3><p>Quick Open with ⌘O, formatting shortcuts, list continuation, Tab to indent, and separate note windows on the Mac.</p></div>
+      <div class="card"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 12h4l3-8 2 16 3-8h4"/></svg></div><h3>Typewriter &amp; focus</h3><p>Keep the line you're writing centered, hide the sidebar and list, and give your words all the space.</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap split">
+    <img class="ipad" src="img/ipad.jpg" alt="Axolotl on iPad showing the Markdown cheatsheet">
+    <div>
+      <div class="eyebrow">Search like you think</div>
+      <h2>Find any note in a keystroke.</h2>
+      <p style="color:var(--muted);font-size:19px">Search operators work anywhere: in the search field, in Quick Open and in <code>axolotl://</code> links.</p>
+      <div class="chips">
+        <code><b>"</b>exact phrase<b>"</b></code><code><b>-</b>word</code><code><b>#</b>work</code><code><b>!#</b>work</code><code><b>-#</b>archive</code><code>a <b>OR</b> b</code>
+        <code><b>@</b>todo</code><code><b>@</b>done</code><code><b>@</b>today</code><code><b>@</b>yesterday</code><code><b>@</b>last7days</code><code><b>@</b>date(&gt;2025-06-01)</code>
+        <code><b>@</b>images</code><code><b>@</b>files</code><code><b>@</b>code</code><code><b>@</b>locked</code><code><b>@</b>pinned</code><code><b>@</b>untagged</code>
+        <code><b>@</b>wikilinks</code><code><b>@</b>backlinks</code><code><b>@</b>ocr</code><code><b>@</b>title</code><code><b>@</b>untitled</code><code><b>@</b>empty</code>
+      </div>
+      <ul class="checks">
+        <li>Three-column layout on Mac and iPad, and a focused single column on iPhone</li>
+        <li>Tag and note-link autocomplete as you type</li>
+        <li>Table of contents, word count and read time in the info panel</li>
+        <li>Bear-style <code>x-callback-url</code> actions for Shortcuts and automation</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="sync" class="alt">
+  <div class="wrap split">
+    <div>
+      <div class="eyebrow">Sync engine</div>
+      <h2>Your devices, talking to each other.</h2>
+      <p style="color:var(--muted);font-size:19px">Axolotl has its own local-first sync engine. Every device keeps a complete copy of your notes, works offline, and syncs when it can.</p>
+      <ul class="checks">
+        <li><b>End-to-end encrypted.</b> One sync code holds your key. The network and any server only ever see AES-256-GCM ciphertext.</li>
+        <li><b>No server needed.</b> Devices on the same Wi-Fi find each other over Bonjour and sync directly.</li>
+        <li><b>Edits merge, they don't overwrite.</b> Each change carries a hybrid logical clock, and concurrent edits to the same note are merged word by word.</li>
+        <li><b>Sync from anywhere, optionally.</b> Run the open-source relay (one file, no dependencies) on any host for syncing while you're away.</li>
+      </ul>
+    </div>
+    <div class="diagram" role="img" aria-label="Diagram: Mac, iPhone and iPad sync directly over the local network, and optionally through an encrypted relay server">
+      <svg viewBox="0 0 520 380">
+        <defs>
+          <marker id="a" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" fill="#e8638b"/></marker>
+          <marker id="b" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" fill="#0f9a8f"/></marker>
+        </defs>
+        <rect x="190" y="18" width="140" height="64" rx="14" fill="none" stroke="#0f9a8f" stroke-width="2" stroke-dasharray="5 5"/>
+        <text x="260" y="46" text-anchor="middle" font-weight="600" font-size="15">Sync relay</text>
+        <text x="260" y="66" text-anchor="middle" class="sub">optional · sees ciphertext only</text>
+        <g font-size="15" font-weight="600" text-anchor="middle">
+          <rect x="20" y="250" width="130" height="88" rx="16" fill="#e8638b" fill-opacity=".12" stroke="#e8638b" stroke-width="2"/>
+          <text x="85" y="290">Mac</text><text x="85" y="312" class="sub" font-weight="400">full replica</text>
+          <rect x="195" y="250" width="130" height="88" rx="16" fill="#e8638b" fill-opacity=".12" stroke="#e8638b" stroke-width="2"/>
+          <text x="260" y="290">iPhone</text><text x="260" y="312" class="sub" font-weight="400">full replica</text>
+          <rect x="370" y="250" width="130" height="88" rx="16" fill="#e8638b" fill-opacity=".12" stroke="#e8638b" stroke-width="2"/>
+          <text x="435" y="290">iPad</text><text x="435" y="312" class="sub" font-weight="400">full replica</text>
+        </g>
+        <path d="M156 294h32M332 294h32" stroke="#e8638b" stroke-width="2.5" marker-start="url(#a)" marker-end="url(#a)"/>
+        <path d="M100 360c80 22 240 22 320 0" fill="none" stroke="#e8638b" stroke-width="2.5" marker-start="url(#a)" marker-end="url(#a)"/>
+        <text x="260" y="234" text-anchor="middle" class="sub">local network · Bonjour · peer to peer</text>
+        <path d="M110 244 215 90M260 244V92M410 244 305 90" stroke="#0f9a8f" stroke-width="2" stroke-dasharray="4 5" marker-start="url(#b)" marker-end="url(#b)"/>
+        <g transform="translate(246 136)"><rect width="28" height="28" rx="8" fill="#0f9a8f"/><path d="M9 13v-2.5a5 5 0 0 1 10 0V13M8 13h12v9H8z" fill="none" stroke="#fff" stroke-width="2" stroke-linejoin="round" transform="translate(0 -1) scale(.95)"/></g>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<section id="download">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">Download</div>
+      <h2>Get Axolotl.</h2>
+      <p>Free and open source under the MIT license. Builds are attached to every <a href="https://github.com/nearbycoder/axolotl/releases">GitHub release</a>.</p>
+    </div>
+    <div class="downloads">
+      <div class="dl">
+        <div class="platform"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg><h3>Mac</h3></div>
+        <p class="req">macOS 14 Sonoma or later · Apple silicon &amp; Intel</p>
+        <div class="actions">
+          <a class="btn primary" href="https://github.com/nearbycoder/axolotl/releases/latest/download/Axolotl-macOS.dmg">Download .dmg</a>
+          <a class="btn" href="https://github.com/nearbycoder/axolotl/releases/latest/download/Axolotl-macOS.zip">Download .zip</a>
+        </div>
+        <details><summary>First launch</summary>
+          <p>The build isn't notarized by Apple yet. After moving Axolotl to Applications, right-click it and choose <b>Open</b>, then <b>Open</b> again. Or run:</p>
+          <pre>xattr -dr com.apple.quarantine /Applications/Axolotl.app</pre>
+        </details>
+      </div>
+      <div class="dl">
+        <div class="platform"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="6" y="2.5" width="12" height="19" rx="3"/><path d="M10.5 18.5h3"/></svg><h3>iPhone &amp; iPad</h3></div>
+        <p class="req">iOS &amp; iPadOS 17 or later</p>
+        <div class="actions">
+          <a class="btn primary" href="altstore://source?url=https://nearbycoder.github.io/axolotl/altstore.json">Add to AltStore / SideStore</a>
+          <a class="btn" href="https://github.com/nearbycoder/axolotl/releases/latest/download/Axolotl-iOS.ipa">Download .ipa</a>
+        </div>
+        <details><summary>How to install</summary>
+          <p>Apple only allows App Store or developer-signed installs on iPhone and iPad, so the IPA is unsigned for sideloading:</p>
+          <p><b>AltStore or SideStore:</b> tap the button above, or add the source <code>https://nearbycoder.github.io/axolotl/altstore.json</code>.<br>
+          <b>Sideloadly:</b> drag the .ipa in and sign with your Apple ID.<br>
+          <b>From source:</b> open <code>Axolotl.xcodeproj</code> in Xcode and run the <code>Axolotl-iOS</code> scheme on your device.</p>
+        </details>
+      </div>
+      <div class="dl">
+        <div class="platform"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="4" width="18" height="7" rx="2"/><rect x="3" y="13" width="18" height="7" rx="2"/><path d="M7 7.5h.01M7 16.5h.01"/></svg><h3>Sync relay</h3></div>
+        <p class="req">Optional · Node 22+ or Docker · any host</p>
+        <div class="actions">
+          <a class="btn" href="https://github.com/nearbycoder/axolotl/tree/main/server">View server source</a>
+        </div>
+        <pre>git clone https://github.com/nearbycoder/axolotl
+cd axolotl/server
+docker compose up -d   # or: node server.mjs</pre>
+        <details><summary>Connecting your devices</summary>
+          <p>Put the relay behind HTTPS (Caddy, Cloudflare Tunnel, Tailscale…), then enter its URL in <b>Settings → Sync → Sync server</b> on each device. Set <code>REGISTRATION=closed</code> once your vault exists. The relay only ever stores encrypted data.</p>
+        </details>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="brand"><img src="img/glyph.png" alt=""> Axolotl</div>
+    <div>Made with care · MIT licensed · <a href="https://github.com/nearbycoder/axolotl">Source on GitHub</a></div>
+  </div>
+</footer>
+
+<script>
+  // Show the latest release version when GitHub is reachable.
+  fetch('https://api.github.com/repos/nearbycoder/axolotl/releases/latest')
+    .then(r => r.ok ? r.json() : null)
+    .then(r => { if (r && r.tag_name) document.getElementById('version').textContent = 'Version ' + r.tag_name.replace(/^v/, ''); })
+    .catch(() => {});
+</script>
+</body>
+</html>
