@@ -22,7 +22,7 @@ public struct ServerClient: Sendable {
     struct PushItem: Codable { var k: String; var h: String; var d: String }
     struct PushBody: Codable { var changes: [PushItem] }
     struct PushResponse: Codable { var accepted: Int; var cursor: Int }
-    struct PullItem: Codable { var s: Int; var d: String }
+    struct PullItem: Codable { var s: Int; var k: String?; var h: String?; var d: String }
     struct PullResponse: Codable { var changes: [PullItem]; var cursor: Int; var more: Bool }
 
     private func url(_ path: String, query: [URLQueryItem] = []) -> URL {
@@ -70,8 +70,13 @@ public struct ServerClient: Sendable {
         try check(response, data)
         let decoded = try JSON.decoder.decode(PullResponse.self, from: data)
         let rows: [SyncRow] = decoded.changes.compactMap { item in
-            guard let sealed = Data(base64Encoded: item.d), let plain = try? keys.open(sealed) else { return nil }
-            return try? JSON.decoder.decode(SyncRow.self, from: plain)
+            guard let sealed = Data(base64Encoded: item.d), let plain = try? keys.open(sealed),
+                  let row = try? JSON.decoder.decode(SyncRow.self, from: plain) else { return nil }
+            // The key and timestamp the relay stores must match the sealed row; otherwise a
+            // compromised relay could replay an old version of a field under a newer timestamp.
+            if let k = item.k, k != keys.rowKey(row) { return nil }
+            if let h = item.h, h != row.hlc { return nil }
+            return row
         }
         return (rows, decoded.cursor, decoded.more)
     }

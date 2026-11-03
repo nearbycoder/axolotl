@@ -88,7 +88,8 @@ struct EditorStyleKey: Equatable {
 /// Platform-independent part of the editor coordinator.
 @MainActor
 class EditorCoordinatorBase: NSObject {
-    let storage: MarkdownTextStorage
+    let storage: NSTextStorage
+    let storageDelegate: MarkdownStorageDelegate
     let layout: MarkdownLayoutManager
     let container: NSTextContainer
     let hider = MarkupHider()
@@ -102,7 +103,9 @@ class EditorCoordinatorBase: NSObject {
 
     init(noteId: String, markdown: String, config: EditorConfig, callbacks: EditorCallbacks, controller: EditorController) {
         let style = config.style.style
-        storage = MarkdownTextStorage(style: style)
+        storage = NSTextStorage()
+        storageDelegate = MarkdownStorageDelegate(style: style)
+        storage.delegate = storageDelegate
         layout = MarkdownLayoutManager(style: style)
         container = NSTextContainer(size: CGSize(width: 600, height: CGFloat.greatestFiniteMagnitude))
         container.lineFragmentPadding = 6
@@ -119,13 +122,18 @@ class EditorCoordinatorBase: NSObject {
         load(markdown)
     }
 
-    var style: EditorStyle { storage.style }
+    var style: EditorStyle { storageDelegate.style }
+
+    /// The current text as a Foundation string, cheap to match against.
+    func snapshot() -> NSString { MarkdownStorageDelegate.snapshot(storage) }
 
     func load(_ markdown: String) {
         isLoading = true
         hider.revealed = NSRange(location: NSNotFound, length: 0)
+        storageDelegate.suspended = true
         storage.setAttributedString(EditorDocument.attributed(from: markdown, style: style, image: callbacks.image))
-        storage.rehighlightAll()
+        storageDelegate.suspended = false
+        storageDelegate.rehighlight(storage)
         lastMarkdown = markdown
         isLoading = false
     }
@@ -177,7 +185,7 @@ class EditorCoordinatorBase: NSObject {
 
     func updateCompletion(selection: NSRange) {
         controller.selection = selection
-        let state = selection.length == 0 ? Formatter.completion(text: storage.string as NSString, caret: selection.location) : nil
+        let state = selection.length == 0 ? Formatter.completion(text: snapshot(), caret: selection.location) : nil
         if state != controller.completion {
             controller.completion = state
             controller.suggestions = state.map(callbacks.suggestions) ?? []
@@ -191,7 +199,7 @@ class EditorCoordinatorBase: NSObject {
 
     /// Shows Markdown syntax only on the paragraph(s) holding the caret while editing.
     func updateReveal(selection: NSRange, focused: Bool) {
-        let text = storage.string as NSString
+        let text = snapshot()
         var next = NSRange(location: NSNotFound, length: 0)
         if focused, selection.location != NSNotFound, selection.location <= text.length {
             next = text.paragraphRange(for: NSRange(location: selection.location, length: min(selection.length, text.length - selection.location)))
@@ -211,7 +219,7 @@ class EditorCoordinatorBase: NSObject {
 
     /// Body attributes for typing on an empty line, so the caret isn't sized like the heading above.
     func typingAttributes(at selection: NSRange) -> [NSAttributedString.Key: Any]? {
-        let text = storage.string as NSString
+        let text = snapshot()
         guard selection.length == 0, selection.location <= text.length else { return nil }
         let para = text.paragraphRange(for: NSRange(location: selection.location, length: 0))
         let content = text.substring(with: para).trimmingCharacters(in: .newlines)
@@ -247,7 +255,8 @@ class EditorCoordinatorBase: NSObject {
         if old.style != new.style {
             let s = new.style.style
             layout.style = s
-            storage.style = s
+            storageDelegate.style = s
+            storageDelegate.rehighlight(storage)
         }
         if old.imagesVersion != new.imagesVersion { refreshImages() }
         return old != new
@@ -257,7 +266,7 @@ class EditorCoordinatorBase: NSObject {
     func activate(at index: Int, commandKey: Bool) -> Bool {
         guard index >= 0, index < storage.length else { return false }
         let attrs = storage.attributes(at: index, effectiveRange: nil)
-        if attrs[.axTodo] != nil, let edit = Formatter.toggleTodo(text: storage.string as NSString, at: index) {
+        if attrs[.axTodo] != nil, let edit = Formatter.toggleTodo(text: snapshot(), at: index) {
             replaceKeepingSelection(edit.range, with: edit.replacement)
             Haptics.tap()
             return true
@@ -520,7 +529,7 @@ struct MarkdownEditor: UIViewRepresentable {
 
         func perform(_ cmd: FormatCommand) {
             guard let tv = textView else { return }
-            guard let edit = Formatter.edit(for: cmd, text: storage.string as NSString, selection: tv.selectedRange) else { return }
+            guard let edit = Formatter.edit(for: cmd, text: snapshot(), selection: tv.selectedRange) else { return }
             replace(edit.range, with: edit.replacement, selection: edit.selection)
         }
 
@@ -563,7 +572,7 @@ struct MarkdownEditor: UIViewRepresentable {
             let snippets = callbacks.onAttachFiles(files)
             guard !snippets.isEmpty, let tv = textView else { return }
             let sel = tv.selectedRange
-            let ns = storage.string as NSString
+            let ns = snapshot()
             let needsLeadingNewline = sel.location > 0 && ns.character(at: sel.location - 1) != 10
             let insertion = (needsLeadingNewline ? "\n" : "") + snippets.joined(separator: "\n") + "\n"
             replace(sel, with: insertion, selection: nil)
@@ -626,7 +635,7 @@ struct MarkdownEditor: UIViewRepresentable {
         }
 
         func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
-            let ns = storage.string as NSString
+            let ns = snapshot()
             if text == "\n", let edit = Formatter.newlineEdit(text: ns, selection: range) {
                 replace(edit.range, with: edit.replacement, selection: edit.selection)
                 return false
@@ -869,7 +878,7 @@ struct MarkdownEditor: NSViewRepresentable {
             let snippets = callbacks.onAttachFiles(files)
             guard !snippets.isEmpty, let tv = textView else { return }
             let sel = tv.selectedRange()
-            let ns = storage.string as NSString
+            let ns = snapshot()
             let needsLeadingNewline = sel.location > 0 && ns.character(at: sel.location - 1) != 10
             let insertion = (needsLeadingNewline ? "\n" : "") + snippets.joined(separator: "\n") + "\n"
             replace(sel, with: insertion, selection: nil)
@@ -884,7 +893,7 @@ struct MarkdownEditor: NSViewRepresentable {
 
         func perform(_ cmd: FormatCommand) {
             guard let tv = textView else { return }
-            guard let edit = Formatter.edit(for: cmd, text: storage.string as NSString, selection: tv.selectedRange()) else { return }
+            guard let edit = Formatter.edit(for: cmd, text: snapshot(), selection: tv.selectedRange()) else { return }
             replace(edit.range, with: edit.replacement, selection: edit.selection)
         }
 
@@ -967,7 +976,7 @@ struct MarkdownEditor: NSViewRepresentable {
                 default: break
                 }
             }
-            let ns = storage.string as NSString
+            let ns = snapshot()
             let sel = textView.selectedRange()
             switch selector {
             case #selector(NSResponder.insertNewline(_:)):

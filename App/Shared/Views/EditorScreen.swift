@@ -225,6 +225,7 @@ struct EditorScreen: View {
                 NoteMenu(noteId: noteId, nav: nav)
                 Divider()
                 Button("Version History", systemImage: "clock.arrow.circlepath") { nav.showHistory = true }
+                    .disabled(model.editableText(for: noteId) == nil)
                 Menu("Attach", systemImage: "paperclip") {
                     Button("Photo", systemImage: "photo") { showPhotoPicker = true }
                     Button("File", systemImage: "doc") { showFileImporter = true }
@@ -293,6 +294,7 @@ struct LockedNoteView: View {
     let noteId: String
     @State private var password = ""
     @State private var failed = false
+    @State private var working = false
 
     var body: some View {
         VStack(spacing: 16) {
@@ -306,7 +308,7 @@ struct LockedNoteView: View {
                     .textFieldStyle(.roundedBorder)
                     .frame(maxWidth: 260)
                     .onSubmit(unlock)
-                Button("Unlock", action: unlock).buttonStyle(.borderedProminent)
+                Button("Unlock", action: unlock).buttonStyle(.borderedProminent).disabled(working)
             }
             if failed { Text("Incorrect password").foregroundStyle(.red).font(.callout) }
             if model.canUseBiometricUnlock {
@@ -325,8 +327,13 @@ struct LockedNoteView: View {
     }
 
     private func unlock() {
-        failed = !model.unlockNotes(password: password)
-        if !failed { password = "" }
+        guard !working else { return }
+        working = true
+        Task {
+            failed = !(await model.unlockNotes(password: password))
+            if !failed { password = "" }
+            working = false
+        }
     }
 }
 
@@ -454,7 +461,7 @@ struct HistoryView: View {
                 List(revisions, selection: $selection) { r in
                     VStack(alignment: .leading) {
                         Text(r.date.formatted(date: .abbreviated, time: .shortened))
-                        Text(NoteCrypto.isEncrypted(r.text) ? "Encrypted" : NoteParser.parse(r.text).title)
+                        Text(model.revisionText(r).map { NoteParser.parse($0).title } ?? "Encrypted")
                             .font(.caption).foregroundStyle(.secondary).lineLimit(1)
                     }
                     .tag(r.id)
@@ -463,7 +470,7 @@ struct HistoryView: View {
                 Divider()
                 ScrollView {
                     if let r = revisions.first(where: { $0.id == selection }) {
-                        Text(NoteCrypto.isEncrypted(r.text) ? "This revision is encrypted." : r.text)
+                        Text(model.revisionText(r) ?? "This revision is encrypted.")
                             .font(.body.monospaced())
                             .textSelection(.enabled)
                             .frame(maxWidth: .infinity, alignment: .leading)

@@ -153,13 +153,14 @@ final class AppSettings {
     var appLock: Bool { didSet { defaults.set(appLock, forKey: "appLock") } }
     var autoLockMinutes: Int { didSet { defaults.set(autoLockMinutes, forKey: "autoLockMinutes") } }
     var keepTagsOnExport: Bool { didSet { defaults.set(keepTagsOnExport, forKey: "keepTagsOnExport") } }
+    var biometricUnlock: Bool { didSet { defaults.set(biometricUnlock, forKey: "biometricUnlock") } }
 
     init() {
         defaults.register(defaults: [
             "lightTheme": "axolotl", "darkTheme": "axolotl-night", "appearance": "system", "font": "system",
             "fontSize": 17.0, "lineHeight": 1.35, "paragraphSpacing": 6.0, "lineWidth": 720.0, "typewriter": false,
             "spellCheck": true, "dimMarkdown": true, "hideMarkdown": true, "sortOrder": "modified", "previewLines": 2, "showListImages": true,
-            "appLock": false, "autoLockMinutes": 5, "keepTagsOnExport": true,
+            "appLock": false, "autoLockMinutes": 5, "keepTagsOnExport": true, "biometricUnlock": true,
         ])
         lightThemeId = defaults.string(forKey: "lightTheme")!
         darkThemeId = defaults.string(forKey: "darkTheme")!
@@ -179,6 +180,7 @@ final class AppSettings {
         appLock = defaults.bool(forKey: "appLock")
         autoLockMinutes = defaults.integer(forKey: "autoLockMinutes")
         keepTagsOnExport = defaults.bool(forKey: "keepTagsOnExport")
+        biometricUnlock = defaults.bool(forKey: "biometricUnlock")
     }
 
     func theme(dark: Bool) -> Theme {

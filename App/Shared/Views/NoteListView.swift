@@ -135,15 +135,22 @@ struct NoteRow: View {
     @Environment(AppModel.self) private var model
     let note: Note
 
+    // Format styles are built once; creating them per row per render showed up in scrolling.
+    private static let calendar = Calendar.current
+    private static let timeStyle = Date.FormatStyle(date: .omitted, time: .shortened)
+    private static let weekdayStyle = Date.FormatStyle.dateTime.weekday(.wide)
+    private static let monthDayStyle = Date.FormatStyle.dateTime.month(.abbreviated).day()
+    private static let fullStyle = Date.FormatStyle.dateTime.month(.abbreviated).day().year()
+
     private var dateText: String {
-        let cal = Calendar.current
-        if cal.isDateInToday(note.modified) { return note.modified.formatted(date: .omitted, time: .shortened) }
+        let cal = Self.calendar
+        if cal.isDateInToday(note.modified) { return note.modified.formatted(Self.timeStyle) }
         if cal.isDateInYesterday(note.modified) { return "Yesterday" }
         if let days = cal.dateComponents([.day], from: note.modified, to: Date()).day, days < 7 {
-            return note.modified.formatted(.dateTime.weekday(.wide))
+            return note.modified.formatted(Self.weekdayStyle)
         }
-        if cal.isDate(note.modified, equalTo: Date(), toGranularity: .year) { return note.modified.formatted(.dateTime.month(.abbreviated).day()) }
-        return note.modified.formatted(.dateTime.month(.abbreviated).day().year())
+        if cal.isDate(note.modified, equalTo: Date(), toGranularity: .year) { return note.modified.formatted(Self.monthDayStyle) }
+        return note.modified.formatted(Self.fullStyle)
     }
 
     var body: some View {
@@ -172,7 +179,7 @@ struct NoteRow: View {
                 .padding(.top, 1)
             }
             Spacer(minLength: 0)
-            if model.settings.showListImages, let first = note.meta.imageIds.first, let img = model.image(for: first) {
+            if model.settings.showListImages, let first = note.meta.imageIds.first, let img = model.thumbnail(for: first) {
                 Image(platformImage: img)
                     .resizable()
                     .scaledToFill()

@@ -181,7 +181,10 @@ public struct MarkdownHTML {
         s = replace(s, #"\[([^\]\n]*)\]\(attachment:([A-Za-z0-9\-]+)\)"#) { g in
             hold("<a class=\"file\" href=\"\(Self.escape(attachmentURL(g[2]) ?? "#"))\">📎 \(Self.escape(g[1]))</a>")
         }
-        s = replace(s, #"!\[([^\]\n]*)\]\(([^)\s]+)\)"#) { g in hold("<img alt=\"\(Self.escape(g[1]))\" src=\"\(Self.escape(g[2]))\">") }
+        s = replace(s, #"!\[([^\]\n]*)\]\(([^)\s]+)\)"#) { g in
+            guard let src = Self.safeHref(g[2], allowImageData: true) else { return hold(Self.escape(g[1])) }
+            return hold("<img alt=\"\(Self.escape(g[1]))\" src=\"\(Self.escape(src))\">")
+        }
         s = replace(s, #"\[\[([^\[\]\n]+?)\]\]"#) { g in
             let inner = g[1]
             let target = NoteParser.wikiTarget(inner)
@@ -191,7 +194,10 @@ public struct MarkdownHTML {
             }
             return hold("<span class=\"wikilink\">\(Self.escape(label))</span>")
         }
-        s = replace(s, #"\[([^\]\n]+)\]\(([^)\s]+)\)"#) { g in hold("<a href=\"\(Self.escape(g[2]))\">\(Self.escape(g[1]))</a>") }
+        s = replace(s, #"\[([^\]\n]+)\]\(([^)\s]+)\)"#) { g in
+            guard let href = Self.safeHref(g[2]) else { return hold(Self.escape(g[1])) }
+            return hold("<a href=\"\(Self.escape(href))\">\(Self.escape(g[1]))</a>")
+        }
         s = replace(s, #"\bhttps?://[^\s<>()\[\]]+[^\s<>()\[\].,;:!?'"]"#) { g in hold("<a href=\"\(Self.escape(g[0]))\">\(Self.escape(g[0]))</a>") }
         let ns = s as NSString
         for t in MarkdownSyntax.tags(in: ns, codeRanges: []).reversed() {
@@ -214,8 +220,31 @@ public struct MarkdownHTML {
         return s
     }
 
+    private static var regexCache: [String: NSRegularExpression] = [:]
+    private static let regexLock = NSLock()
+
+    private static func regex(_ pattern: String) -> NSRegularExpression? {
+        regexLock.lock()
+        defer { regexLock.unlock() }
+        if let cached = regexCache[pattern] { return cached }
+        let compiled = try? NSRegularExpression(pattern: pattern)
+        if let compiled { regexCache[pattern] = compiled }
+        return compiled
+    }
+
+    /// Only link targets a reader would expect; `javascript:` and friends render as plain text.
+    static func safeHref(_ raw: String, allowImageData: Bool = false) -> String? {
+        let url = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard let colon = url.firstIndex(of: ":") else { return url }
+        let scheme = url[..<colon].lowercased()
+        guard scheme.allSatisfy({ $0.isLetter || $0.isNumber || $0 == "+" || $0 == "-" || $0 == "." }) else { return url }
+        if ["http", "https", "mailto", "tel", "axolotl", "x-callback-url", "bear", "obsidian"].contains(scheme) { return url }
+        if allowImageData, scheme == "data", url.lowercased().hasPrefix("data:image/") { return url }
+        return nil
+    }
+
     private func replace(_ s: String, _ pattern: String, _ transform: ([String]) -> String) -> String {
-        guard let re = try? NSRegularExpression(pattern: pattern) else { return s }
+        guard let re = Self.regex(pattern) else { return s }
         let ns = s as NSString
         var out = ""
         var last = 0

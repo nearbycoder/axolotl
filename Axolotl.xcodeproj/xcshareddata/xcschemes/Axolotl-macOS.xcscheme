@@ -39,6 +39,17 @@
          </BuildableReference>
       </MacroExpansion>
       <Testables>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "F43700E15E76F522B20F3EC4"
+               BuildableName = "Axolotl-macOSTests.xctest"
+               BlueprintName = "Axolotl-macOSTests"
+               ReferencedContainer = "container:Axolotl.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
       <CommandLineArguments>
       </CommandLineArguments>

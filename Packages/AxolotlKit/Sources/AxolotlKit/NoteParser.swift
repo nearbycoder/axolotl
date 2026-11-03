@@ -34,15 +34,48 @@ public enum MarkdownSyntax {
     public static let mathInline = re(#"(?<![\\$])\$(?=\S)[^$\n]+?(?<=\S)\$(?!\$)"#)
     public static let footnote = re(#"\[\^[^\]\s]+\]"#)
 
+    /// Sorted, non-overlapping ranges with binary-search membership tests, so callers can check
+    /// thousands of matches against thousands of code spans without going quadratic.
+    public struct CodeIndex {
+        public let ranges: [NSRange]
+
+        public init(_ ranges: [NSRange]) { self.ranges = ranges.sorted { $0.location < $1.location } }
+
+        public var isEmpty: Bool { ranges.isEmpty }
+
+        /// Index of the last range starting at or before `location`.
+        private func lastStarting(atOrBefore location: Int) -> Int? {
+            var lo = 0, hi = ranges.count - 1, found: Int?
+            while lo <= hi {
+                let mid = (lo + hi) / 2
+                if ranges[mid].location <= location { found = mid; lo = mid + 1 } else { hi = mid - 1 }
+            }
+            return found
+        }
+
+        public func contains(_ location: Int) -> Bool {
+            guard let i = lastStarting(atOrBefore: location) else { return false }
+            return NSLocationInRange(location, ranges[i])
+        }
+
+        public func intersects(_ r: NSRange) -> Bool {
+            guard r.length > 0 else { return contains(r.location) }
+            guard let i = lastStarting(atOrBefore: NSMaxRange(r) - 1) else { return false }
+            return NSMaxRange(ranges[i]) > r.location
+        }
+    }
+
     /// UTF-16 ranges of fenced code blocks (including fences) and inline code spans.
-    public static func codeRanges(in text: NSString) -> [NSRange] {
-        let fenced = fencedBlocks(in: text)
-        var ranges = fenced
+    public static func codeRanges(in text: NSString) -> [NSRange] { codeIndex(in: text).ranges }
+
+    public static func codeIndex(in text: NSString) -> CodeIndex {
+        let fenced = CodeIndex(fencedBlocks(in: text))
+        var ranges = fenced.ranges
         inlineCode.enumerateMatches(in: text as String, range: NSRange(location: 0, length: text.length)) { m, _, _ in
-            guard let m, !fenced.contains(where: { NSIntersectionRange($0, m.range).length > 0 }) else { return }
+            guard let m, !fenced.intersects(m.range) else { return }
             ranges.append(m.range)
         }
-        return ranges
+        return CodeIndex(ranges)
     }
 
     /// UTF-16 ranges of fenced code blocks, from the opening fence line through the closing one.
@@ -75,17 +108,22 @@ public enum MarkdownSyntax {
 
     /// All tags in the text, skipping code. Ranges include the `#` markers.
     public static func tags(in text: NSString, codeRanges: [NSRange]? = nil) -> [TagMatch] {
-        let code = codeRanges ?? self.codeRanges(in: text)
-        let full = NSRange(location: 0, length: text.length)
+        tags(in: text, range: nil, code: codeRanges.map(CodeIndex.init))
+    }
+
+    /// Tags within `range` (whole text when nil), skipping code. Ranges include the `#` markers.
+    public static func tags(in text: NSString, range: NSRange?, code: CodeIndex?) -> [TagMatch] {
+        let code = code ?? codeIndex(in: text)
+        let scope = range ?? NSRange(location: 0, length: text.length)
         var result: [TagMatch] = []
-        func inCode(_ r: NSRange) -> Bool { code.contains { NSIntersectionRange($0, r).length > 0 || NSLocationInRange(r.location, $0) } }
-        multiWordTag.enumerateMatches(in: text as String, range: full) { m, _, _ in
+        func inCode(_ r: NSRange) -> Bool { code.intersects(r) }
+        multiWordTag.enumerateMatches(in: text as String, range: scope) { m, _, _ in
             guard let m, !inCode(m.range) else { return }
             let name = text.substring(with: m.range(at: 1))
             guard name.contains(" ") else { return }
             result.append(TagMatch(range: m.range, name: normalizeTag(name)))
         }
-        tag.enumerateMatches(in: text as String, range: full) { m, _, _ in
+        tag.enumerateMatches(in: text as String, range: scope) { m, _, _ in
             guard let m, !inCode(m.range) else { return }
             if result.contains(where: { NSIntersectionRange($0.range, m.range).length > 0 }) { return }
             // A heading marker is `#` followed by whitespace, which the pattern already excludes.
@@ -109,9 +147,11 @@ public enum MarkdownSyntax {
 public enum NoteParser {
     public static func parse(_ body: String) -> NoteMeta {
         var meta = NoteMeta()
-        let text = body as NSString
+        // A Foundation string: regexes over a bridged Swift string re-transcode it on every call.
+        let text = NSString(string: body)
+        let s = text as String
         let full = NSRange(location: 0, length: text.length)
-        let code = MarkdownSyntax.codeRanges(in: text)
+        let code = MarkdownSyntax.codeIndex(in: text)
 
         // Title: first non-empty line.
         var titleLineEnd = 0
@@ -148,32 +188,32 @@ public enum NoteParser {
         }
 
         var seenTags = Set<String>()
-        for t in MarkdownSyntax.tags(in: text, codeRanges: code) where seenTags.insert(t.name.lowercased()).inserted {
+        for t in MarkdownSyntax.tags(in: text, range: nil, code: code) where seenTags.insert(t.name.lowercased()).inserted {
             meta.tags.append(t.name)
         }
 
         var seenLinks = Set<String>()
-        MarkdownSyntax.wikiLink.enumerateMatches(in: body, range: full) { m, _, _ in
-            guard let m, !code.contains(where: { NSIntersectionRange($0, m.range).length > 0 }) else { return }
+        MarkdownSyntax.wikiLink.enumerateMatches(in: s, range: full) { m, _, _ in
+            guard let m, !code.intersects(m.range) else { return }
             let target = wikiTarget(text.substring(with: m.range(at: 1)))
             if seenLinks.insert(target.lowercased()).inserted { meta.wikiLinks.append(target) }
         }
 
-        MarkdownSyntax.todo.enumerateMatches(in: body, range: full) { m, _, _ in
-            guard let m, !code.contains(where: { NSLocationInRange(m.range.location, $0) }) else { return }
+        MarkdownSyntax.todo.enumerateMatches(in: s, range: full) { m, _, _ in
+            guard let m, !code.contains(m.range.location) else { return }
             if text.substring(with: m.range(at: 3)) == " " { meta.openTodos += 1 } else { meta.doneTodos += 1 }
         }
 
         meta.hasCode = !code.isEmpty
 
-        MarkdownSyntax.attachmentRef.enumerateMatches(in: body, range: full) { m, _, _ in
+        MarkdownSyntax.attachmentRef.enumerateMatches(in: s, range: full) { m, _, _ in
             guard let m else { return }
             let id = text.substring(with: m.range(at: 3))
             if m.range(at: 1).length > 0 { meta.imageIds.append(id) } else { meta.fileIds.append(id) }
         }
 
-        MarkdownSyntax.heading.enumerateMatches(in: body, range: full) { m, _, _ in
-            guard let m, !code.contains(where: { NSLocationInRange(m.range.location, $0) }) else { return }
+        MarkdownSyntax.heading.enumerateMatches(in: s, range: full) { m, _, _ in
+            guard let m, !code.contains(m.range.location) else { return }
             let level = m.range(at: 1).length
             let title = cleanInline(text.substring(with: m.range(at: 2)))
             meta.headings.append(Heading(level: level, text: title, location: m.range.location))
@@ -188,6 +228,23 @@ public enum NoteParser {
         return target.trimmingCharacters(in: .whitespaces)
     }
 
+    // Compiled once: `replacingOccurrences(options: .regularExpression)` recompiles on every call,
+    // which dominated parsing of large libraries.
+    private static func re(_ pattern: String) -> NSRegularExpression { try! NSRegularExpression(pattern: pattern) }
+    private static let todoPrefix = re(#"^[-*+] \[[ xX]\] "#)
+    private static let listPrefix = re(#"^([-*+]|\d+[.)]) "#)
+    private static let attachmentAny = re(#"!?\[([^\]]*)\]\(attachment:[^)]+\)"#)
+    private static let imageAny = re(#"!\[([^\]]*)\]\([^)]+\)"#)
+    private static let linkAny = re(#"\[([^\]]+)\]\([^)]+\)"#)
+    private static let wikiAny = re(#"\[\[([^\]|]+)(\|([^\]]+))?\]\]"#)
+    private static let emphasisAny = re(#"(?<!\w)[*_](\S[^*_]*)[*_](?!\w)"#)
+    private static let underlineAny = re(#"(?<![~\w])~(\S[^~]*)~(?![~\w])"#)
+
+    private static func replace(_ regex: NSRegularExpression, in s: String, with template: String) -> String {
+        let ns = s as NSString
+        return regex.stringByReplacingMatches(in: s, range: NSRange(location: 0, length: ns.length), withTemplate: template)
+    }
+
     static func stripHeadingMarker(_ line: String) -> String {
         var s = Substring(line)
         if s.hasPrefix("#") {
@@ -197,21 +254,30 @@ public enum NoteParser {
             }
         }
         if s.hasPrefix(">") { s = s.drop { $0 == ">" || $0 == " " } }
-        if let m = s.range(of: #"^[-*+] \[[ xX]\] "#, options: .regularExpression) { s = s[m.upperBound...] }
-        else if let m = s.range(of: #"^([-*+]|\d+[.)]) "#, options: .regularExpression) { s = s[m.upperBound...] }
-        return s.trimmingCharacters(in: .whitespaces)
+        let str = String(s)
+        let ns = str as NSString
+        if let m = todoPrefix.firstMatch(in: str, range: NSRange(location: 0, length: ns.length)) {
+            return ns.substring(from: NSMaxRange(m.range)).trimmingCharacters(in: .whitespaces)
+        }
+        if let m = listPrefix.firstMatch(in: str, range: NSRange(location: 0, length: ns.length)) {
+            return ns.substring(from: NSMaxRange(m.range)).trimmingCharacters(in: .whitespaces)
+        }
+        return str.trimmingCharacters(in: .whitespaces)
     }
 
     /// Strips inline Markdown markup for display in lists and titles.
     public static func cleanInline(_ s: String) -> String {
+        guard s.contains(where: { "[*_~=`!".contains($0) }) else { return s.trimmingCharacters(in: .whitespaces) }
         var out = s
-        out = out.replacingOccurrences(of: #"!?\[([^\]]*)\]\(attachment:[^)]+\)"#, with: "", options: .regularExpression)
-        out = out.replacingOccurrences(of: #"!\[([^\]]*)\]\([^)]+\)"#, with: "$1", options: .regularExpression)
-        out = out.replacingOccurrences(of: #"\[([^\]]+)\]\([^)]+\)"#, with: "$1", options: .regularExpression)
-        out = out.replacingOccurrences(of: #"\[\[([^\]|]+)(\|([^\]]+))?\]\]"#, with: "$1", options: .regularExpression)
-        for marker in ["**", "__", "~~", "==", "`"] { out = out.replacingOccurrences(of: marker, with: "") }
-        out = out.replacingOccurrences(of: #"(?<!\w)[*_](\S[^*_]*)[*_](?!\w)"#, with: "$1", options: .regularExpression)
-        out = out.replacingOccurrences(of: #"(?<![~\w])~(\S[^~]*)~(?![~\w])"#, with: "$1", options: .regularExpression)
+        if out.contains("](") {
+            out = replace(attachmentAny, in: out, with: "")
+            out = replace(imageAny, in: out, with: "$1")
+            out = replace(linkAny, in: out, with: "$1")
+        }
+        if out.contains("[[") { out = replace(wikiAny, in: out, with: "$1") }
+        for marker in ["**", "__", "~~", "==", "`"] where out.contains(marker) { out = out.replacingOccurrences(of: marker, with: "") }
+        if out.contains("*") || out.contains("_") { out = replace(emphasisAny, in: out, with: "$1") }
+        if out.contains("~") { out = replace(underlineAny, in: out, with: "$1") }
         return out.trimmingCharacters(in: .whitespaces)
     }
 }

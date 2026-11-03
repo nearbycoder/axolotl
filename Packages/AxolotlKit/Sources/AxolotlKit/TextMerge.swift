@@ -38,7 +38,8 @@ public enum TextMerge {
     }
 
     /// Myers O(ND) diff over integer token ids. Falls back to a single hunk when the edit distance is huge.
-    static func diff(_ a: [Int], _ b: [Int], maxEdits: Int = 6000) -> [Hunk] {
+    /// The trace is O(D²) in memory (about 32 MB at the default bound), so the bound matters on iPhone.
+    static func diff(_ a: [Int], _ b: [Int], maxEdits: Int = 2000) -> [Hunk] {
         var prefix = 0
         while prefix < a.count && prefix < b.count && a[prefix] == b[prefix] { prefix += 1 }
         var suffix = 0

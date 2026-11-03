@@ -6,74 +6,88 @@ import AppKit
 import UIKit
 #endif
 
-/// Text storage that restyles Markdown as it is edited.
-final class MarkdownTextStorage: NSTextStorage {
-    private let backing = NSMutableAttributedString()
-    private var fenceCount = 0
-    var style: EditorStyle {
-        didSet { rehighlightAll() }
-    }
+#if os(macOS)
+typealias TextStorageEditActions = NSTextStorageEditActions
+#else
+typealias TextStorageEditActions = NSTextStorage.EditActions
+#endif
+
+/// Restyles Markdown as the text storage is edited.
+///
+/// A delegate on a plain `NSTextStorage` rather than a subclass: a Swift subclass pays
+/// Objective-C bridging on every attribute lookup, which made layout of long notes about
+/// 45× slower and every keystroke several times slower.
+final class MarkdownStorageDelegate: NSObject, NSTextStorageDelegate {
+    var style: EditorStyle
+    /// Fenced-block count after the last pass; nil until the first pass.
+    private var fenceCount: Int?
+    /// Set while a document is loaded, so the bulk replacement is styled once by `rehighlight`.
+    var suspended = false
 
     init(style: EditorStyle) {
         self.style = style
         super.init()
     }
 
-    required init?(coder: NSCoder) { fatalError("not supported") }
-    #if os(macOS)
-    required init?(pasteboardPropertyList propertyList: Any, ofType type: NSPasteboard.PasteboardType) { fatalError("not supported") }
-    #endif
-
-    override var string: String { backing.string }
-
-    override func attributes(at location: Int, effectiveRange range: NSRangePointer?) -> [NSAttributedString.Key: Any] {
-        backing.attributes(at: location, effectiveRange: range)
-    }
-
-    override func replaceCharacters(in range: NSRange, with str: String) {
-        beginEditing()
-        backing.replaceCharacters(in: range, with: str)
-        edited(.editedCharacters, range: range, changeInLength: (str as NSString).length - range.length)
-        endEditing()
-    }
-
-    override func setAttributes(_ attrs: [NSAttributedString.Key: Any]?, range: NSRange) {
-        beginEditing()
-        backing.setAttributes(attrs, range: range)
-        edited(.editedAttributes, range: range, changeInLength: 0)
-        endEditing()
-    }
-
-    override func processEditing() {
-        if editedMask.contains(.editedCharacters) {
-            let text = backing.string as NSString
-            let fences = MarkdownSyntax.fencedBlocks(in: text)
-            var range = text.paragraphRange(for: editedRange)
-            let paragraph = text.substring(with: range)
-            if fences.count != fenceCount || paragraph.contains("```") || paragraph.contains("~~~") {
-                range = NSRange(location: 0, length: text.length)
-            } else {
-                for f in fences where NSIntersectionRange(f, range).length > 0 || NSLocationInRange(range.location, f) {
-                    range = NSUnionRange(range, f)
-                }
+    /// Styles the edited paragraphs inside the storage's own processing pass. TextKit allows
+    /// attribute changes here ("delegates can change the characters or attributes"), and doing
+    /// the work in this pass means the layout manager is invalidated once per keystroke rather
+    /// than once for the characters and again for the attributes.
+    func textStorage(_ storage: NSTextStorage, willProcessEditing editedMask: TextStorageEditActions, range editedRange: NSRange, changeInLength delta: Int) {
+        guard !suspended, editedMask.contains(.editedCharacters) else { return }
+        let text = Self.snapshot(storage)
+        guard text.length > 0 else { return }
+        let fences = MarkdownSyntax.fencedBlocks(in: text)
+        let location = min(editedRange.location, text.length)
+        var range = text.paragraphRange(for: NSRange(location: location, length: min(editedRange.length, text.length - location)))
+        let paragraph = text.substring(with: range)
+        if let known = fenceCount, known != fences.count || paragraph.contains("```") || paragraph.contains("~~~") {
+            range = NSRange(location: 0, length: text.length)
+        } else {
+            for f in fences where NSIntersectionRange(f, range).length > 0 || NSLocationInRange(range.location, f) {
+                range = NSUnionRange(range, f)
             }
-            fenceCount = fences.count
-            if range.length > 0 {
-                MarkdownHighlighter.highlight(backing, range: range, style: style)
-                edited(.editedAttributes, range: range, changeInLength: 0)
-            }
+            // Callout colouring flows down a quote block, so restyle the whole block.
+            range = Self.quoteBlock(around: range, in: text)
         }
-        super.processEditing()
+        fenceCount = fences.count
+        if range.length > 0 {
+            MarkdownHighlighter.highlight(storage, range: range, style: style, fencedBlocks: fences, text: text)
+        }
     }
 
-    func rehighlightAll() {
-        guard backing.length > 0 else { return }
-        beginEditing()
-        let all = NSRange(location: 0, length: backing.length)
-        fenceCount = MarkdownSyntax.fencedBlocks(in: backing.string as NSString).count
-        MarkdownHighlighter.highlight(backing, range: all, style: style)
-        edited(.editedAttributes, range: all, changeInLength: 0)
-        endEditing()
+    func rehighlight(_ storage: NSTextStorage) {
+        guard storage.length > 0 else { return }
+        let text = Self.snapshot(storage)
+        let fences = MarkdownSyntax.fencedBlocks(in: text)
+        fenceCount = fences.count
+        storage.beginEditing()
+        MarkdownHighlighter.highlight(storage, range: NSRange(location: 0, length: storage.length), style: style, fencedBlocks: fences, text: text)
+        storage.endEditing()
+    }
+
+    /// A real Foundation string. Regexes over a bridged Swift string re-transcode the whole
+    /// document on every call; one memcpy here makes every match afterwards cheap.
+    static func snapshot(_ storage: NSMutableAttributedString) -> NSString {
+        storage.mutableString.copy() as! NSString
+    }
+
+    /// Extends `range` to the contiguous run of `>` paragraphs around it.
+    static func quoteBlock(around range: NSRange, in text: NSString) -> NSRange {
+        func isQuote(_ r: NSRange) -> Bool { text.substring(with: r).trimmingCharacters(in: .whitespaces).hasPrefix(">") }
+        guard isQuote(range) else { return range }
+        var result = range
+        while result.location > 0 {
+            let prev = text.paragraphRange(for: NSRange(location: result.location - 1, length: 0))
+            guard isQuote(prev) else { break }
+            result = NSUnionRange(result, prev)
+        }
+        while NSMaxRange(result) < text.length {
+            let next = text.paragraphRange(for: NSRange(location: NSMaxRange(result), length: 0))
+            guard isQuote(next) else { break }
+            result = NSUnionRange(result, next)
+        }
+        return result
     }
 }
 
@@ -85,17 +99,26 @@ final class MarkupHider: NSObject, NSLayoutManagerDelegate {
     func layoutManager(_ layoutManager: NSLayoutManager, shouldGenerateGlyphs glyphs: UnsafePointer<CGGlyph>,
                        properties props: UnsafePointer<NSLayoutManager.GlyphProperty>, characterIndexes charIndexes: UnsafePointer<Int>,
                        font aFont: PlatformFont, forGlyphRange glyphRange: NSRange) -> Int {
-        guard let storage = layoutManager.textStorage else { return 0 }
-        var changed: [NSLayoutManager.GlyphProperty]?
-        let length = storage.length
+        guard let storage = layoutManager.textStorage, glyphRange.length > 0 else { return 0 }
+        // Look at attribute runs once per glyph run instead of one lookup per character.
+        let first = charIndexes[0], last = charIndexes[glyphRange.length - 1]
+        let span = NSIntersectionRange(NSRange(location: first, length: max(1, last - first + 1)), NSRange(location: 0, length: storage.length))
+        guard span.length > 0 else { return 0 }
+        var hidden: [NSRange] = []
+        storage.enumerateAttribute(.axHidden, in: span, options: .longestEffectiveRangeNotRequired) { value, r, _ in
+            guard value != nil else { return }
+            guard revealed.location != NSNotFound else { hidden.append(r); return }
+            let shown = NSIntersectionRange(r, revealed)
+            guard shown.length > 0 else { hidden.append(r); return }
+            if r.location < shown.location { hidden.append(NSRange(location: r.location, length: shown.location - r.location)) }
+            if NSMaxRange(shown) < NSMaxRange(r) { hidden.append(NSRange(location: NSMaxRange(shown), length: NSMaxRange(r) - NSMaxRange(shown))) }
+        }
+        guard !hidden.isEmpty else { return 0 }
+        var changed = Array(UnsafeBufferPointer(start: props, count: glyphRange.length))
         for i in 0..<glyphRange.length {
             let ci = charIndexes[i]
-            guard ci < length, revealed.location == NSNotFound || !NSLocationInRange(ci, revealed),
-                  storage.attribute(.axHidden, at: ci, effectiveRange: nil) != nil else { continue }
-            if changed == nil { changed = Array(UnsafeBufferPointer(start: props, count: glyphRange.length)) }
-            changed![i] = .null
+            if hidden.contains(where: { NSLocationInRange(ci, $0) }) { changed[i] = .null }
         }
-        guard let changed else { return 0 }
         changed.withUnsafeBufferPointer { buffer in
             layoutManager.setGlyphs(glyphs, properties: buffer.baseAddress!, characterIndexes: charIndexes, font: aFont, forGlyphRange: glyphRange)
         }
@@ -153,7 +176,6 @@ final class MarkdownLayoutManager: NSLayoutManager {
         super.drawBackground(forGlyphRange: glyphsToShow, at: origin)
         guard let storage = textStorage, let ctx = context, let container = textContainers.first else { return }
         let charRange = characterRange(forGlyphRange: glyphsToShow, actualGlyphRange: nil)
-        let theme = style.theme
         let padding = container.lineFragmentPadding
         let full = NSRange(location: 0, length: storage.length)
 
@@ -170,7 +192,7 @@ final class MarkdownLayoutManager: NSLayoutManager {
             guard let first = rects.first, let last = rects.last else { return }
             let box = CGRect(x: origin.x + first.minX + padding, y: origin.y + first.minY,
                              width: first.width - padding * 2, height: last.maxY - first.minY).insetBy(dx: 0, dy: 1)
-            ctx.setFillColor(theme.codeBackgroundColor.cgColor)
+            ctx.setFillColor(style.codeBackgroundColor.cgColor)
             ctx.addPath(CGPath(roundedRect: box, cornerWidth: 8, cornerHeight: 8, transform: nil))
             ctx.fillPath()
         }
@@ -194,7 +216,7 @@ final class MarkdownLayoutManager: NSLayoutManager {
         storage.enumerateAttribute(.axRule, in: charRange) { value, range, _ in
             guard value != nil else { return }
             for r in lineRects(for: range, in: container) {
-                ctx.setFillColor(theme.secondaryColor.withAlpha(0.35).cgColor)
+                ctx.setFillColor(style.secondaryColor.withAlpha(0.35).cgColor)
                 ctx.fill(CGRect(x: origin.x + r.minX + padding, y: origin.y + r.midY, width: r.width - padding * 2, height: 1))
             }
         }
@@ -217,10 +239,10 @@ final class MarkdownLayoutManager: NSLayoutManager {
             }
         }
         storage.enumerateAttribute(.axInlineCode, in: charRange) { value, range, _ in
-            if value != nil { pill(range, theme.codeBackgroundColor) }
+            if value != nil { pill(range, style.codeBackgroundColor) }
         }
         storage.enumerateAttribute(.axTag, in: charRange) { value, range, _ in
-            if value != nil { pill(range, theme.accentColor.withAlpha(0.12)) }
+            if value != nil { pill(range, style.accentColor.withAlpha(0.12)) }
         }
     }
 
@@ -228,7 +250,6 @@ final class MarkdownLayoutManager: NSLayoutManager {
         super.drawGlyphs(forGlyphRange: glyphsToShow, at: origin)
         guard let storage = textStorage, let ctx = context, let container = textContainers.first else { return }
         let charRange = characterRange(forGlyphRange: glyphsToShow, actualGlyphRange: nil)
-        let theme = style.theme
         ctx.saveGState()
         defer { ctx.restoreGState() }
 
@@ -244,10 +265,10 @@ final class MarkdownLayoutManager: NSLayoutManager {
             let box = CGRect(x: origin.x + rect.minX + 1, y: origin.y + centerY - side / 2, width: side, height: side)
             let path = CGPath(roundedRect: box, cornerWidth: side * 0.28, cornerHeight: side * 0.28, transform: nil)
             if checked {
-                ctx.setFillColor(theme.accentColor.cgColor)
+                ctx.setFillColor(style.accentColor.cgColor)
                 ctx.addPath(path)
                 ctx.fillPath()
-                ctx.setStrokeColor(theme.backgroundColor.cgColor)
+                ctx.setStrokeColor(style.backgroundColor.cgColor)
                 ctx.setLineWidth(max(1.6, side * 0.12))
                 ctx.setLineCap(.round)
                 ctx.setLineJoin(.round)
@@ -256,7 +277,7 @@ final class MarkdownLayoutManager: NSLayoutManager {
                 ctx.addLine(to: CGPoint(x: box.minX + side * 0.76, y: box.minY + side * 0.3))
                 ctx.strokePath()
             } else {
-                ctx.setStrokeColor(theme.secondaryColor.cgColor)
+                ctx.setStrokeColor(style.secondaryColor.cgColor)
                 ctx.setLineWidth(1.4)
                 ctx.addPath(CGPath(roundedRect: box.insetBy(dx: 0.7, dy: 0.7), cornerWidth: side * 0.26, cornerHeight: side * 0.26, transform: nil))
                 ctx.strokePath()
@@ -272,7 +293,7 @@ final class MarkdownLayoutManager: NSLayoutManager {
             let line = lineFragmentUsedRect(forGlyphAt: glyphs.location, effectiveRange: nil)
             let baselineY = line.minY + location(forGlyphAt: glyphs.location).y
             let center = CGPoint(x: origin.x + rect.midX, y: origin.y + baselineY - font.xHeight / 2)
-            ctx.setFillColor(theme.accentColor.cgColor)
+            ctx.setFillColor(style.accentColor.cgColor)
             ctx.fillEllipse(in: CGRect(x: center.x - d / 2, y: center.y - d / 2, width: d, height: d))
         }
     }

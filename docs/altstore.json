@@ -22,6 +22,15 @@
       ],
       "versions": [
         {
+          "version": "1.2.0",
+          "buildVersion": "3",
+          "date": "2026-11-03",
+          "localizedDescription": "Performance and security release: much faster editing in long notes, faster launch with large libraries, image loading off the main thread, locked notes now also remove their earlier plaintext history, stronger password hashing, relay responses are verified, and the sync relay gained quotas and streaming uploads.",
+          "downloadURL": "https://github.com/nearbycoder/axolotl/releases/download/v1.2.0/Axolotl-iOS.ipa",
+          "size": 0,
+          "minOSVersion": "17.0"
+        },
+        {
           "version": "1.1.0",
           "buildVersion": "2",
           "date": "2026-11-03",

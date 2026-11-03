@@ -16,9 +16,8 @@
 <link rel="icon" type="image/svg+xml" href="img/icon.svg">
 <link rel="icon" type="image/png" href="img/favicon.png">
 <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="preload" href="fonts/instrument-serif.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/inter.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -138,7 +137,7 @@
           </div>
         </div>
       </div>
-      <div class="stage-phone"><div class="phone"><img src="img/iphone-editor-dark.jpg" alt="Axolotl on iPhone showing the same note in the Axolotl Night theme" width="1200" height="2609"></div></div>
+      <div class="stage-phone"><div class="phone"><img src="img/iphone-editor-dark-600.jpg" srcset="img/iphone-editor-dark-600.jpg 600w, img/iphone-editor-dark.jpg 1200w" sizes="(max-width: 760px) 0px, 19vw" alt="Axolotl on iPhone showing the same note in the Axolotl Night theme" width="1200" height="2609"></div></div>
     </div>
 
     <div class="theme-picker reveal" role="group" aria-label="Preview a theme">
@@ -305,7 +304,7 @@
       </div>
       <div class="platforms">
         <figure class="reveal"><div class="tablet"><img src="img/ipad-dark.jpg" alt="Axolotl on iPad in the Axolotl Night theme with sidebar, note list and editor" width="1125" height="1500" loading="lazy"></div><figcaption>iPad, in Axolotl Night</figcaption></figure>
-        <figure class="reveal"><div class="phone"><img src="img/iphone-list-light.jpg" alt="The Axolotl note list on iPhone" width="1200" height="2609" loading="lazy"></div><figcaption>iPhone, in Axolotl</figcaption></figure>
+        <figure class="reveal"><div class="phone"><img src="img/iphone-list-light-600.jpg" srcset="img/iphone-list-light-600.jpg 600w, img/iphone-list-light.jpg 1200w" sizes="(max-width: 860px) 62vw, 26vw" alt="The Axolotl note list on iPhone" width="1200" height="2609" loading="lazy"></div><figcaption>iPhone, in Axolotl</figcaption></figure>
       </div>
     </div>
   </section>

@@ -303,17 +303,17 @@ struct SecuritySettings: View {
         @Bindable var s = model.settings
         Section {
             Toggle("Require \(Biometrics.label) to open", isOn: $s.appLock)
-            if s.appLock {
-                Picker("Lock after", selection: $s.autoLockMinutes) {
-                    Text("Immediately").tag(0)
-                    Text("1 minute").tag(1)
-                    Text("5 minutes").tag(5)
-                    Text("15 minutes").tag(15)
-                    Text("1 hour").tag(60)
-                }
+            Picker("Lock after", selection: $s.autoLockMinutes) {
+                Text("Immediately").tag(0)
+                Text("1 minute").tag(1)
+                Text("5 minutes").tag(5)
+                Text("15 minutes").tag(15)
+                Text("1 hour").tag(60)
             }
         } header: {
             Text("App lock")
+        } footer: {
+            Text("After this long in the background, the app locks (if enabled) and locked notes need their password again.")
         }
         Section {
             if model.encryptionConfigured {
@@ -324,13 +324,14 @@ struct SecuritySettings: View {
             } else {
                 Button("Set Encryption Password…") { showPassword = true }
             }
+            Toggle("Unlock with \(Biometrics.label)", isOn: Binding(get: { s.biometricUnlock }, set: { model.setBiometricUnlock($0) }))
         } header: {
             Text("Locked notes")
         } footer: {
-            Text("Locked notes are encrypted with AES-256-GCM before they are stored or synced. The password is shared by all your devices.")
+            Text("Locked notes are encrypted with AES-256-GCM before they are stored or synced. The password is shared by all your devices. With \(Biometrics.label) unlock on, the password is kept in this device's Keychain.")
         }
         .sheet(isPresented: $showPassword) {
-            PasswordSetupView { model.setEncryptionPassword($0) }
+            PasswordSetupView { password in Task { await model.setEncryptionPassword(password) } }
         }
     }
 }

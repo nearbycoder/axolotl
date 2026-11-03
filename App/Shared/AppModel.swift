@@ -73,17 +73,37 @@ final class AppModel {
     @ObservationIgnored private var decrypted: [String: String] = [:]
     @ObservationIgnored var backgroundedAt: Date?
 
-    @ObservationIgnored private var imageCache = NSCache<NSString, PlatformImage>()
+    @ObservationIgnored private let imageCache: NSCache<NSString, PlatformImage> = {
+        let cache = NSCache<NSString, PlatformImage>()
+        cache.totalCostLimit = 192 * 1024 * 1024
+        return cache
+    }()
+    @ObservationIgnored private let thumbnailCache: NSCache<NSString, PlatformImage> = {
+        let cache = NSCache<NSString, PlatformImage>()
+        cache.totalCostLimit = 32 * 1024 * 1024
+        return cache
+    }()
+    @ObservationIgnored private var imagesLoading = Set<String>()
+    @ObservationIgnored private let imageQueue = DispatchQueue(label: "com.nearbycoder.axolotl.images", qos: .userInitiated, attributes: .concurrent)
+    @ObservationIgnored private var blobGCTask: Task<Void, Never>?
 
     static let dataDirectory: URL = {
+        let env = ProcessInfo.processInfo.environment
+        if let override = env["AXOLOTL_DATA_DIR"], !override.isEmpty { return URL(fileURLWithPath: override, isDirectory: true) }
+        // Running as a unit-test host: never touch the real library.
+        if env["XCTestConfigurationFilePath"] != nil || env["XCTestBundlePath"] != nil {
+            return FileManager.default.temporaryDirectory.appendingPathComponent("AxolotlTestHost", isDirectory: true)
+        }
         let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
         return base.appendingPathComponent("Axolotl", isDirectory: true)
     }()
 
-    init() {
+    convenience init() { self.init(dataDirectory: Self.dataDirectory) }
+
+    init(dataDirectory: URL) {
         let replica: Replica
         do {
-            replica = try Replica(directory: Self.dataDirectory)
+            replica = try Replica(directory: dataDirectory)
         } catch {
             fatalError("Could not open the note database: \(error)")
         }
@@ -97,6 +117,7 @@ final class AppModel {
             seedWelcomeNotes()
             replica.setKV("seeded", "1")
         }
+        scheduleBlobGC()
         #if DEBUG
         if ProcessInfo.processInfo.environment["AXOLOTL_DEMO"] == "1" { loadDemoLibrary() }
         #endif
@@ -107,6 +128,7 @@ final class AppModel {
         attachments = replica.attachments
         tagMeta = replica.tagMeta
         encryptionConfigured = replica.config("encryption", "salt") != nil
+        notesVersion += 1
         rebuildTags()
     }
 
@@ -114,11 +136,14 @@ final class AppModel {
         if !change.notes.isEmpty {
             notes = replica.notes
             for id in change.notes where notes[id]?.isEncrypted == true { decrypted.removeValue(forKey: id) }
+            notesVersion += 1
             rebuildTags()
         }
         if !change.attachments.isEmpty {
             attachments = replica.attachments
             imagesVersion += 1
+            notesVersion += 1
+            if change.isRemote { scheduleBlobGC() }
         }
         if !change.tags.isEmpty {
             tagMeta = replica.tagMeta
@@ -173,11 +198,30 @@ final class AppModel {
         tagMeta[path.lowercased()]?.icon ?? (tagMeta[path.lowercased()]?.pinned == true ? "pin" : "number")
     }
 
-    func count(for item: SidebarItem) -> Int {
-        notes(for: item, search: "", sort: settings.sortOrder).count
+    private struct ListKey: Hashable { var item: SidebarItem; var search: String; var sort: SortOrder }
+    /// Bumped whenever note data changes. `notes(for:)` reads it, so views that call it re-render.
+    private(set) var notesVersion = 0
+    @ObservationIgnored private var listCache: [ListKey: [Note]] = [:]
+    @ObservationIgnored private var listCacheVersion = -1
+
+    func count(for item: SidebarItem) -> Int { notes(for: item, search: "", sort: .modified).count }
+
+    /// Filtered, sorted notes for a sidebar item. Memoized per data version: SwiftUI evaluates
+    /// list bodies far more often (selection, focus, scrolling) than the data changes.
+    func notes(for item: SidebarItem, search: String, sort: SortOrder) -> [Note] {
+        let version = notesVersion
+        if listCacheVersion != version {
+            listCache.removeAll(keepingCapacity: true)
+            listCacheVersion = version
+        }
+        let key = ListKey(item: item, search: search.trimmingCharacters(in: .whitespaces), sort: sort)
+        if let cached = listCache[key] { return cached }
+        let result = sorted(filtered(for: item, search: key.search), by: sort, pinnedFirst: item != .trash)
+        listCache[key] = result
+        return result
     }
 
-    func notes(for item: SidebarItem, search: String, sort: SortOrder) -> [Note] {
+    private func filtered(for item: SidebarItem, search: String) -> [Note] {
         let calendar = Calendar.current
         var list = liveNotes.filter { note in
             switch item {
@@ -193,14 +237,17 @@ final class AppModel {
                 return !note.isTrashed && !note.archived && note.meta.tags.contains { $0.lowercased() == p || $0.lowercased().hasPrefix(p + "/") }
             }
         }
-        let trimmed = search.trimmingCharacters(in: .whitespaces)
-        if !trimmed.isEmpty {
-            let query = SearchQuery(trimmed)
+        if !search.isEmpty {
+            let query = SearchQuery(search)
             let ctx = SearchContext(backlinked: backlinkedIds, attachments: attachments)
-            list = list.filter { query.matches(note(withDecryptedTitle: $0), context: ctx) }
+            list = list.filter { query.matches($0, context: ctx) }
         }
-        return list.sorted { a, b in
-            if item != .trash && a.pinned != b.pinned { return a.pinned }
+        return list
+    }
+
+    private func sorted(_ list: [Note], by sort: SortOrder, pinnedFirst: Bool) -> [Note] {
+        list.sorted { a, b in
+            if pinnedFirst && a.pinned != b.pinned { return a.pinned }
             switch sort {
             case .modified: return a.modified > b.modified
             case .created: return a.created > b.created
@@ -208,8 +255,6 @@ final class AppModel {
             }
         }
     }
-
-    private func note(withDecryptedTitle note: Note) -> Note { note }
 
     var backlinkedIds: Set<String> {
         var titles: [String: String] = [:]
@@ -294,10 +339,24 @@ final class AppModel {
     func setArchived(_ id: String, _ value: Bool) { replica.setArchived(id, value) }
     func trash(_ id: String) { replica.setTrashed(id, true) }
     func restore(_ id: String) { replica.setTrashed(id, false) }
-    func deleteForever(_ id: String) { replica.deleteForever(id) }
+    func deleteForever(_ id: String) {
+        replica.deleteForever(id)
+        scheduleBlobGC()
+    }
 
     func emptyTrash() {
         for n in liveNotes where n.isTrashed { replica.deleteForever(n.id) }
+        scheduleBlobGC()
+    }
+
+    /// Removes attachment files nothing references any more, a little after the change settles.
+    private func scheduleBlobGC() {
+        blobGCTask?.cancel()
+        blobGCTask = Task { [weak self] in
+            try? await Task.sleep(for: .seconds(3))
+            guard !Task.isCancelled else { return }
+            self?.replica.collectGarbageBlobs()
+        }
     }
 
     @discardableResult
@@ -312,6 +371,13 @@ final class AppModel {
     }
 
     func revisions(for id: String) -> [Revision] { replica.revisions(for: id) }
+
+    /// Readable text of a revision: decrypted while the note is unlocked, nil while it is locked.
+    func revisionText(_ revision: Revision) -> String? {
+        guard NoteCrypto.isEncrypted(revision.text) else { return revision.text }
+        guard let key = encryptionKey else { return nil }
+        return try? NoteCrypto.decrypt(revision.text, key: key)
+    }
 
     func restore(revision: Revision, of id: String) {
         guard let note = notes[id] else { return }
@@ -374,14 +440,11 @@ final class AppModel {
             var mime = file.mime
             var name = file.name
             // HEIC and very large images are re-encoded for portability.
-            if mime.hasPrefix("image/"), mime != "image/gif", let img = PlatformImage.fromData(data),
-               mime == "image/heic" || data.count > 4_000_000 {
-                let scaled = img.thumbnail(maxDimension: 2400)
-                if let jpg = scaled.jpegData(quality: 0.85) {
-                    data = jpg
-                    mime = "image/jpeg"
-                    name = (name as NSString).deletingPathExtension + ".jpg"
-                }
+            if mime.hasPrefix("image/"), mime != "image/gif", mime == "image/heic" || data.count > 4_000_000,
+               let jpg = ImageLoader.reencodedJPEG(data, maxPixels: 2400, quality: 0.85) {
+                data = jpg
+                mime = "image/jpeg"
+                name = (name as NSString).deletingPathExtension + ".jpg"
             }
             guard let attachment = try? replica.addAttachment(data: data, name: name, mime: mime, noteId: noteId) else { continue }
             let label = name.replacingOccurrences(of: "]", with: "")
@@ -391,13 +454,37 @@ final class AppModel {
         return snippets
     }
 
+    /// Editor-size image, or nil while it decodes in the background. Callers observe
+    /// `imagesVersion`, which bumps when the image is ready.
     func image(for attachmentId: String) -> PlatformImage? {
-        guard let a = attachments[attachmentId], !a.hash.isEmpty else { return nil }
-        if let cached = imageCache.object(forKey: a.hash as NSString) { return cached }
-        guard let data = replica.blob(a.hash), let img = PlatformImage.fromData(data) else { return nil }
-        let display = img.thumbnail(maxDimension: 1600)
-        imageCache.setObject(display, forKey: a.hash as NSString)
-        return display
+        cachedImage(for: attachmentId, cache: imageCache, maxPixels: 2000)
+    }
+
+    /// Small image for list rows, decoded separately so scrolling never pays for full-size decodes.
+    func thumbnail(for attachmentId: String) -> PlatformImage? {
+        cachedImage(for: attachmentId, cache: thumbnailCache, maxPixels: 240)
+    }
+
+    private func cachedImage(for attachmentId: String, cache: NSCache<NSString, PlatformImage>, maxPixels: CGFloat) -> PlatformImage? {
+        _ = imagesVersion
+        guard let a = attachments[attachmentId], Replica.isValidBlobHash(a.hash) else { return nil }
+        if let cached = cache.object(forKey: a.hash as NSString) { return cached }
+        let token = "\(a.hash)-\(Int(maxPixels))"
+        guard !imagesLoading.contains(token), replica.hasBlob(a.hash) else { return nil }
+        imagesLoading.insert(token)
+        let url = replica.blobURL(a.hash)
+        imageQueue.async { [weak self] in
+            let image = ImageLoader.downsampled(url: url, maxPixels: maxPixels)
+            Task { @MainActor [weak self] in
+                guard let self else { return }
+                self.imagesLoading.remove(token)
+                guard let image else { return }
+                let size = image.pixelSize
+                cache.setObject(image, forKey: a.hash as NSString, cost: Int(size.width * size.height * 4))
+                self.imagesVersion += 1
+            }
+        }
+        return nil
     }
 
     func attachmentData(_ id: String) -> Data? {
@@ -433,33 +520,56 @@ final class AppModel {
 
     // MARK: Encryption
 
-    func setEncryptionPassword(_ password: String) {
+    private var keychainAccount: String { "encryption-\(replica.deviceId)" }
+
+    /// The KDF cost in use for this vault. Vaults set up before 1.2 keep the lower legacy cost.
+    private var encryptionIterations: UInt32 {
+        replica.config("encryption", "iterations").flatMap { UInt32($0) } ?? NoteCrypto.legacyIterations
+    }
+
+    /// The password only goes into the Keychain (for Face ID / Touch ID unlock) when the user opted in.
+    private func rememberPassword(_ password: String) {
+        if settings.biometricUnlock { Keychain.save(password, account: keychainAccount) } else { Keychain.delete(account: keychainAccount) }
+    }
+
+    func setBiometricUnlock(_ enabled: Bool) {
+        settings.biometricUnlock = enabled
+        if !enabled { Keychain.delete(account: keychainAccount) }
+    }
+
+    /// Derives the key off the main thread; 600k PBKDF2 rounds take a noticeable moment on a phone.
+    private func derive(_ password: String, salt: Data, iterations: UInt32) async -> SymmetricKey {
+        await Task.detached(priority: .userInitiated) { NoteCrypto.deriveKey(password: password, salt: salt, iterations: iterations) }.value
+    }
+
+    func setEncryptionPassword(_ password: String) async {
         let salt = NoteCrypto.makeSalt()
-        let key = NoteCrypto.deriveKey(password: password, salt: salt)
+        let key = await derive(password, salt: salt, iterations: NoteCrypto.defaultIterations)
         replica.setConfig("encryption", "salt", salt.base64EncodedString())
+        replica.setConfig("encryption", "iterations", String(NoteCrypto.defaultIterations))
         replica.setConfig("encryption", "check", NoteCrypto.makeCheck(key: key))
         encryptionKey = key
-        Keychain.save(password, account: "encryption-\(replica.deviceId)")
+        rememberPassword(password)
     }
 
     @discardableResult
-    func unlockNotes(password: String) -> Bool {
+    func unlockNotes(password: String) async -> Bool {
         guard let saltString = replica.config("encryption", "salt"), let salt = Data(base64Encoded: saltString),
               let check = replica.config("encryption", "check") else { return false }
-        let key = NoteCrypto.deriveKey(password: password, salt: salt)
+        let key = await derive(password, salt: salt, iterations: encryptionIterations)
         guard NoteCrypto.verify(key: key, check: check) else { return false }
         encryptionKey = key
-        Keychain.save(password, account: "encryption-\(replica.deviceId)")
+        rememberPassword(password)
         return true
     }
 
     func unlockNotesWithBiometrics() async -> Bool {
-        guard let password = Keychain.load(account: "encryption-\(replica.deviceId)") else { return false }
+        guard settings.biometricUnlock, let password = Keychain.load(account: keychainAccount) else { return false }
         guard await Biometrics.authenticate(reason: "Unlock your locked notes") else { return false }
-        return unlockNotes(password: password)
+        return await unlockNotes(password: password)
     }
 
-    var canUseBiometricUnlock: Bool { Keychain.load(account: "encryption-\(replica.deviceId)") != nil && Biometrics.isAvailable }
+    var canUseBiometricUnlock: Bool { settings.biometricUnlock && Biometrics.isAvailable && Keychain.load(account: keychainAccount) != nil }
 
     func relockNotes() {
         encryptionKey = nil
@@ -490,9 +600,10 @@ final class AppModel {
 
     func didBecomeActive() {
         sync.activate()
-        if settings.appLock, let at = backgroundedAt, Date().timeIntervalSince(at) > Double(settings.autoLockMinutes * 60) {
-            isAppLocked = true
-            relockNotes()
+        if let at = backgroundedAt, Date().timeIntervalSince(at) > Double(settings.autoLockMinutes * 60) {
+            if settings.appLock { isAppLocked = true }
+            // Locked notes re-lock on the same schedule whether or not the whole app is locked.
+            if encryptionKey != nil { relockNotes() }
         }
         backgroundedAt = nil
     }
