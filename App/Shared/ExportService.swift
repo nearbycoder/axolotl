@@ -334,7 +334,11 @@ enum ImportService {
             let ns = text as NSString
             for m in MarkdownSyntax.image.matches(in: text, range: NSRange(location: 0, length: ns.length)).reversed() {
                 let path = ns.substring(with: m.range(at: 2)).removingPercentEncoding ?? ""
-                guard path.hasPrefix("assets/"), let data = try? Data(contentsOf: url.appendingPathComponent(path)) else { continue }
+                // Only files inside the bundle's assets folder; a crafted bundle must not read anything else.
+                let assets = url.standardizedFileURL.appendingPathComponent("assets", isDirectory: true).path + "/"
+                let fileURL = url.appendingPathComponent(path).standardizedFileURL
+                guard path.hasPrefix("assets/"), !path.contains(".."), fileURL.path.hasPrefix(assets),
+                      let data = try? Data(contentsOf: fileURL) else { continue }
                 let name = (path as NSString).lastPathComponent
                 if let snippet = model.addFiles([(data, name, UTTypeHelper.mime(forExtension: (name as NSString).pathExtension))], to: id).first {
                     text = (text as NSString).replacingCharacters(in: m.range, with: snippet)

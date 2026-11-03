@@ -5,6 +5,9 @@ on:
     branches: [main]
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   kit:
     name: AxolotlKit tests
@@ -34,7 +37,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: sudo xcode-select -s "$(ls -d /Applications/Xcode*.app | sort -V | tail -1)"
-      - name: macOS
-        run: xcodebuild -project Axolotl.xcodeproj -scheme Axolotl-macOS -destination 'generic/platform=macOS' CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM= build -quiet
+      - name: macOS build and tests
+        run: xcodebuild -project Axolotl.xcodeproj -scheme Axolotl-macOS -destination 'platform=macOS' CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM= test -quiet
       - name: iOS
         run: xcodebuild -project Axolotl.xcodeproj -scheme Axolotl-iOS -destination 'generic/platform=iOS' CODE_SIGNING_ALLOWED=NO DEVELOPMENT_TEAM= build -quiet

@@ -20,7 +20,12 @@ final class LANSync {
         var vector: [String: String]?
         var rows: [SyncRow]?
         var hash: String?
-        var data: Data?
+    }
+
+    /// Sealed frame payloads start with a type byte.
+    private enum FrameType: UInt8 {
+        case message = 0   // JSON `Message`
+        case blob = 1      // 64-char hex hash followed by the raw bytes
     }
 
     final class Peer {
@@ -140,7 +145,22 @@ final class LANSync {
     // MARK: Framing
 
     private func send(_ message: Message, to peer: Peer) {
-        guard let plain = try? JSON.encoder.encode(message), let sealed = try? keys.seal(plain) else { return }
+        guard let plain = try? JSON.encoder.encode(message) else { return }
+        sendFrame(.message, plain, to: peer)
+    }
+
+    /// Blobs travel as raw bytes rather than base64 inside JSON, which saves a third of the
+    /// bandwidth and two in-memory copies.
+    private func sendBlob(_ hash: String, _ data: Data, to peer: Peer) {
+        var plain = Data(hash.utf8)
+        plain.append(data)
+        sendFrame(.blob, plain, to: peer)
+    }
+
+    private func sendFrame(_ type: FrameType, _ plain: Data, to peer: Peer) {
+        var payload = Data([type.rawValue])
+        payload.append(plain)
+        guard let sealed = try? keys.seal(payload) else { return }
         var frame = Data()
         var length = UInt32(sealed.count).bigEndian
         withUnsafeBytes(of: &length) { frame.append(contentsOf: $0) }
@@ -154,13 +174,25 @@ final class LANSync {
                 guard let self else { return }
                 guard error == nil, !complete, let header, header.count == 4 else { return self.drop(peer) }
                 let length = header.reduce(0) { ($0 << 8) | Int($1) }
-                guard length > 0, length < 256 * 1024 * 1024 else { return self.drop(peer) }
+                // Until a peer proves it holds the vault key with a valid hello, it may not make us buffer much.
+                let limit = peer.deviceId == nil ? 64 * 1024 : 256 * 1024 * 1024
+                guard length > 0, length <= limit else { return self.drop(peer) }
                 peer.connection.receive(minimumIncompleteLength: length, maximumLength: length) { body, _, _, error in
                     MainActor.assumeIsolated {
                         guard error == nil, let body, body.count == length,
-                              let plain = try? self.keys.open(body),
-                              let message = try? JSON.decoder.decode(Message.self, from: plain) else { return self.drop(peer) }
-                        self.handle(message, from: peer)
+                              let plain = try? self.keys.open(body), let type = plain.first else { return self.drop(peer) }
+                        let payload = plain.dropFirst()
+                        switch FrameType(rawValue: type) {
+                        case .message:
+                            guard let message = try? JSON.decoder.decode(Message.self, from: payload) else { return self.drop(peer) }
+                            self.handle(message, from: peer)
+                        case .blob:
+                            guard peer.deviceId != nil, payload.count > 64 else { return self.drop(peer) }
+                            let hash = String(decoding: payload.prefix(64), as: UTF8.self)
+                            if (try? self.replica.putBlob(Data(payload.dropFirst(64)), expectedHash: hash)) != nil { self.onSynced?() }
+                        case nil:
+                            return self.drop(peer)
+                        }
                         self.receive(peer)
                     }
                 }
@@ -171,6 +203,7 @@ final class LANSync {
     // MARK: Protocol
 
     private func handle(_ message: Message, from peer: Peer) {
+        guard peer.deviceId != nil || message.t == "hello" else { return drop(peer) }
         switch message.t {
         case "hello":
             guard let id = message.id, id != replica.deviceId else { return drop(peer) }
@@ -196,17 +229,12 @@ final class LANSync {
             publishPeers()
             onSynced?()
         case "blobReq":
-            if let hash = message.hash {
+            if let hash = message.hash, Replica.isValidBlobHash(hash) {
                 if let data = replica.blob(hash) {
-                    send(Message(t: "blob", hash: hash, data: data), to: peer)
+                    sendBlob(hash, data, to: peer)
                 } else {
                     send(Message(t: "blobMissing", hash: hash), to: peer)
                 }
-            }
-        case "blob":
-            if let hash = message.hash, let data = message.data {
-                _ = try? replica.putBlob(data, expectedHash: hash)
-                onSynced?()
             }
         default:
             break

@@ -97,5 +97,24 @@ final class ServerIntegrationTests: XCTestCase {
         let intruder = ServerClient(baseURL: base, keys: try XCTUnwrap(VaultKeys(syncCode: VaultKeys.generateCode())))
         let other = try await intruder.pull(since: 0)
         XCTAssertTrue(other.rows.isEmpty)
+
+        // A relay (or anyone holding the auth token) that re-files an old ciphertext under a
+        // newer timestamp or another key must be ignored by clients.
+        let stale = SyncRow(entity: Entity.note, id: id, field: "pinned", value: "true", hlc: "0000000000001-0000-mac1", origin: "mac1")
+        let sealed = try keys.seal(JSON.encoder.encode(stale)).base64EncodedString()
+        let forgedKey = Data("forged".utf8).sha256.prefix(32)
+        let body = #"{"changes":[{"k":"\#(keys.rowKey(stale))","h":"9999999999999-0000-mac1","d":"\#(sealed)"},{"k":"\#(forgedKey)","h":"9999999999999-0001-mac1","d":"\#(sealed)"}]}"#
+        var request = URLRequest(url: base.appendingPathComponent("v1/vaults/\(keys.vaultId)/push"))
+        request.httpMethod = "POST"
+        request.httpBody = Data(body.utf8)
+        request.setValue("Bearer \(keys.authToken)", forHTTPHeaderField: "Authorization")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        let (_, response) = try await URLSession.shared.data(for: request)
+        XCTAssertEqual((response as? HTTPURLResponse)?.statusCode, 200)
+        let c = try replica("fresh")
+        var cc = 0
+        try await sync(c, client, cursor: &cc)
+        XCTAssertEqual(c.notes[id]?.pinned, false, "tampered row was applied")
+        XCTAssertEqual(c.notes[id]?.body, a.notes[id]?.body)
     }
 }

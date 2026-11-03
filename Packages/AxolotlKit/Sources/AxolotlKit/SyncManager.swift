@@ -152,7 +152,8 @@ public final class SyncManager {
         guard lan != nil else { return }
         lanBroadcast?.cancel()
         lanBroadcast = Task { [weak self] in
-            try? await Task.sleep(for: .milliseconds(700))
+            // Sending freezes the current revision, so wait for a pause in typing.
+            try? await Task.sleep(for: .milliseconds(1500))
             guard !Task.isCancelled else { return }
             self?.lan?.broadcast()
         }
@@ -203,7 +204,7 @@ public final class SyncManager {
         }
     }
 
-    private func schedulePush(delay: Double = 1.2) {
+    private func schedulePush(delay: Double = 2.0) {
         guard let client, active else { return }
         if pushTask != nil { pushAgain = true; return }
         pushTask = Task { [weak self] in

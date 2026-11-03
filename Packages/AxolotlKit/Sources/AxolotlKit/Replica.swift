@@ -62,6 +62,7 @@ public final class Replica {
           hlc TEXT NOT NULL, origin TEXT NOT NULL, seq INTEGER NOT NULL, dirty INTEGER NOT NULL DEFAULT 1,
           sent INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(entity, id, field));
         CREATE INDEX IF NOT EXISTS records_dirty ON records(seq) WHERE dirty = 1;
+        CREATE INDEX IF NOT EXISTS records_origin_hlc ON records(origin, hlc);
         CREATE TABLE IF NOT EXISTS seen(origin TEXT PRIMARY KEY, hlc TEXT NOT NULL);
         CREATE TABLE IF NOT EXISTS known_revs(note TEXT NOT NULL, rev TEXT NOT NULL, PRIMARY KEY(note, rev));
         CREATE TABLE IF NOT EXISTS revisions(note TEXT NOT NULL, rev TEXT NOT NULL, text TEXT NOT NULL, date REAL NOT NULL, PRIMARY KEY(note, rev));
@@ -90,8 +91,23 @@ public final class Replica {
             info[Key(entity: r.entity, id: r.id, field: r.field)] = Info(hlc: r.hlc, origin: r.origin, sent: row[6].int == 1)
             materialize(r, recomputeMeta: false)
         }
-        for id in notes.keys { refreshMeta(id) }
+        parseAllMetadata()
         pending = ReplicaChange()
+    }
+
+    /// Parses every note's metadata in parallel; the parser is pure and its regexes are thread-safe.
+    private func parseAllMetadata() {
+        let ids = Array(notes.keys)
+        let bodies = ids.map { notes[$0]!.body }
+        var metas = [NoteMeta](repeating: NoteMeta(), count: ids.count)
+        metas.withUnsafeMutableBufferPointer { buffer in
+            let out = buffer
+            DispatchQueue.concurrentPerform(iterations: ids.count) { i in
+                let body = bodies[i]
+                out[i] = NoteCrypto.isEncrypted(body) ? NoteMeta() : NoteParser.parse(body)
+            }
+        }
+        for (i, id) in ids.enumerated() { notes[id]?.meta = metas[i] }
     }
 
     static func makeDeviceId() -> String {
@@ -141,6 +157,7 @@ public final class Replica {
                 try? db.run("UPDATE records SET value=?, seq=?, dirty=1 WHERE entity=? AND id=? AND field='body'",
                             [.text(value), .int(seq), .text(Entity.note), .text(id)])
                 try? db.run("UPDATE revisions SET text=? WHERE note=? AND rev=?", [.text(text), .text(id), .text(cur.hlc)])
+                if NoteCrypto.isEncrypted(text) { purgePlaintextRevisions(id) }
                 materialize(SyncRow(entity: Entity.note, id: id, field: "body", value: value, hlc: cur.hlc, origin: deviceId))
                 pending.hasLocalRows = true
             } else {
@@ -199,9 +216,10 @@ public final class Replica {
 
     // MARK: - Blobs
 
-    public func blobURL(_ hash: String) -> URL { blobDirectory.appendingPathComponent(hash) }
-    public func hasBlob(_ hash: String) -> Bool { FileManager.default.fileExists(atPath: blobURL(hash).path) }
-    public func blob(_ hash: String) -> Data? { try? Data(contentsOf: blobURL(hash)) }
+    public static func isValidBlobHash(_ hash: String) -> Bool { hash.count == 64 && hash.allSatisfy(\.isHexDigit) }
+    public func blobURL(_ hash: String) -> URL { blobDirectory.appendingPathComponent(Self.isValidBlobHash(hash) ? hash : "invalid") }
+    public func hasBlob(_ hash: String) -> Bool { Self.isValidBlobHash(hash) && FileManager.default.fileExists(atPath: blobURL(hash).path) }
+    public func blob(_ hash: String) -> Data? { Self.isValidBlobHash(hash) ? try? Data(contentsOf: blobURL(hash)) : nil }
 
     @discardableResult
     public func putBlob(_ data: Data, expectedHash: String? = nil) throws -> String {
@@ -243,13 +261,39 @@ public final class Replica {
     }
 
     /// Every row the holder of `vector` has not seen, oldest first.
+    ///
+    /// One indexed query per origin, so a caught-up peer costs a handful of empty lookups rather
+    /// than a scan of the whole table on every broadcast.
     public func rows(after vector: [String: String]) -> [SyncRow] {
-        let all = (try? db.query("SELECT entity, id, field, value, hlc, origin FROM records ORDER BY hlc")) ?? []
-        return all.compactMap { r in
-            let row = SyncRow(entity: r[0].string!, id: r[1].string!, field: r[2].string!, value: r[3].string!, hlc: r[4].string!, origin: r[5].string!)
-            if let have = vector[row.origin], row.hlc <= have { return nil }
-            return row
+        var out: [SyncRow] = []
+        func decode(_ r: [SQLValue]) -> SyncRow {
+            SyncRow(entity: r[0].string!, id: r[1].string!, field: r[2].string!, value: r[3].string!, hlc: r[4].string!, origin: r[5].string!)
         }
+        // `seen` holds every origin that has rows here.
+        for origin in seen.keys {
+            let rows: [[SQLValue]]
+            if let have = vector[origin] {
+                rows = (try? db.query("SELECT entity, id, field, value, hlc, origin FROM records WHERE origin=? AND hlc>?", [.text(origin), .text(have)])) ?? []
+            } else {
+                rows = (try? db.query("SELECT entity, id, field, value, hlc, origin FROM records WHERE origin=?", [.text(origin)])) ?? []
+            }
+            out.append(contentsOf: rows.map(decode))
+        }
+        return out.sorted { $0.hlc < $1.hlc }
+    }
+
+    /// Deletes blob files that no live attachment references and forgets their upload state.
+    @discardableResult
+    public func collectGarbageBlobs() -> Int {
+        let referenced = Set(attachments.values.filter { !$0.deleted && !$0.hash.isEmpty }.map(\.hash))
+        guard let files = try? FileManager.default.contentsOfDirectory(atPath: blobDirectory.path) else { return 0 }
+        var removed = 0
+        for name in files where name.count == 64 && !referenced.contains(name) {
+            guard (try? FileManager.default.removeItem(at: blobDirectory.appendingPathComponent(name))) != nil else { continue }
+            try? db.run("DELETE FROM uploaded_blobs WHERE hash=?", [.text(name)])
+            removed += 1
+        }
+        return removed
     }
 
     /// Records that `rows` left this device, which freezes local revisions against amendment.
@@ -455,8 +499,16 @@ public final class Replica {
         markKnown(note, rev)
         let date = HLC(rev)?.date.timeIntervalSince1970 ?? Date().timeIntervalSince1970
         try? db.run("INSERT OR IGNORE INTO revisions(note, rev, text, date) VALUES(?, ?, ?, ?)", [.text(note), .text(rev), .text(text), .double(date)])
+        if NoteCrypto.isEncrypted(text) { purgePlaintextRevisions(note) }
         revisionWrites += 1
         if revisionWrites % 25 == 0 { pruneRevisions(note) }
+    }
+
+    /// Once a note is locked, its earlier plaintext history must not stay readable on disk
+    /// (or on any other device that receives the encrypted body).
+    private func purgePlaintextRevisions(_ note: String) {
+        try? db.run("DELETE FROM revisions WHERE note=? AND substr(text, 1, ?) != ?",
+                    [.text(note), .int(Int64(NoteCrypto.prefix.count)), .text(NoteCrypto.prefix)])
     }
 
     /// Keeps the most recent revisions (merge bases) plus one per hour for older history.

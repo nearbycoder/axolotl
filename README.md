@@ -70,6 +70,24 @@ docker compose up -d
 
 Put it behind HTTPS (Caddy, Cloudflare Tunnel, Tailscale, Fly.io…) and enter its URL in **Settings → Sync → Sync server**. Set `REGISTRATION=closed` once your vault exists to stop new vaults being created.
 
+| Variable | Default | Meaning |
+| --- | --- | --- |
+| `REGISTRATION` | `open` | `closed` refuses unknown vaults |
+| `MAX_VAULTS` | `100` | vaults this relay will register |
+| `MAX_VAULT_BYTES` | 5 GiB | storage per vault, rows plus attachments |
+| `MAX_BLOB_BYTES` | 200 MiB | largest single attachment |
+| `TRUST_PROXY` | unset | `1` to rate-limit by `X-Forwarded-For` behind your own proxy |
+
+New vaults are also limited to 10 per address per hour. Attachments stream to disk, so the relay's memory use does not grow with attachment size.
+
+### What the sync protocol protects
+
+- **Confidentiality.** Rows and attachments are sealed with AES-256-GCM under keys derived (HKDF) from the sync code. The relay stores only ciphertext, an opaque per-field key (an HMAC of the field's identity) and the row's logical timestamp.
+- **Integrity and rollback.** Clients check that the key and timestamp the relay returns match the sealed row, so a relay (or anyone holding the auth token) cannot re-file an old version of a field as the newest. Attachments are addressed by their SHA-256 and verified on receipt.
+- **Local network.** Peers must present a frame sealed with the vault key before they are allowed to send anything large. Discovery only advertises a short HKDF-derived hint, not the key.
+- **Locked notes.** Note bodies are encrypted with a key derived from your password (PBKDF2-HMAC-SHA256, 600,000 rounds for vaults created from 1.2 on). Locking a note also removes its earlier plaintext history from every device. The title of a locked note stays visible, as in Bear.
+- **What it does not do.** There is no forward secrecy: anyone who learns the sync code can read everything synced with it, past and future. Rotate by creating a new vault. The relay can still see when and how much you sync, and it can withhold data.
+
 ## Install
 
 Grab the latest build from the [download page](https://nearbycoder.github.io/axolotl/) or [Releases](https://github.com/nearbycoder/axolotl/releases):

@@ -1,4 +1,6 @@
 import SwiftUI
+import ImageIO
+import UniformTypeIdentifiers
 
 #if os(macOS)
 import AppKit
@@ -115,6 +117,41 @@ extension PlatformImage {
         #else
         return UIGraphicsImageRenderer(size: target).image { _ in draw(in: CGRect(origin: .zero, size: target)) }
         #endif
+    }
+}
+
+/// ImageIO-based decoding. Downsampling while decoding is several times faster than a full
+/// decode plus redraw, and it never materialises the full-size bitmap.
+enum ImageLoader {
+    private static func options(maxPixels: CGFloat) -> CFDictionary {
+        [kCGImageSourceCreateThumbnailFromImageAlways: true,
+         kCGImageSourceCreateThumbnailWithTransform: true,
+         kCGImageSourceShouldCacheImmediately: true,
+         kCGImageSourceThumbnailMaxPixelSize: maxPixels] as CFDictionary
+    }
+
+    private static func image(from source: CGImageSource, maxPixels: CGFloat) -> PlatformImage? {
+        guard let cg = CGImageSourceCreateThumbnailAtIndex(source, 0, options(maxPixels: maxPixels)) else { return nil }
+        #if os(macOS)
+        return NSImage(cgImage: cg, size: NSSize(width: cg.width, height: cg.height))
+        #else
+        return UIImage(cgImage: cg)
+        #endif
+    }
+
+    static func downsampled(url: URL, maxPixels: CGFloat) -> PlatformImage? {
+        guard let source = CGImageSourceCreateWithURL(url as CFURL, [kCGImageSourceShouldCache: false] as CFDictionary) else { return nil }
+        return image(from: source, maxPixels: maxPixels)
+    }
+
+    /// Re-encodes an image as JPEG no larger than `maxPixels` on its longest side.
+    static func reencodedJPEG(_ data: Data, maxPixels: CGFloat, quality: CGFloat) -> Data? {
+        guard let source = CGImageSourceCreateWithData(data as CFData, nil),
+              let cg = CGImageSourceCreateThumbnailAtIndex(source, 0, options(maxPixels: maxPixels)) else { return nil }
+        let out = NSMutableData()
+        guard let destination = CGImageDestinationCreateWithData(out, UTType.jpeg.identifier as CFString, 1, nil) else { return nil }
+        CGImageDestinationAddImage(destination, cg, [kCGImageDestinationLossyCompressionQuality: quality] as CFDictionary)
+        return CGImageDestinationFinalize(destination) ? out as Data : nil
     }
 }
 

@@ -73,7 +73,10 @@ public struct VaultKeys: Sendable {
 public enum NoteCrypto {
     public static let prefix = "AXENC1:"
     static let checkPlaintext = "axolotl-note-lock-check"
-    public static let iterations: UInt32 = 120_000
+    /// Cost of the password KDF. Vaults created before 1.2 used `legacyIterations`; the value in
+    /// use is stored in the synced `encryption` config so every device derives the same key.
+    public static let defaultIterations: UInt32 = 600_000
+    public static let legacyIterations: UInt32 = 120_000
 
     public static func isEncrypted(_ body: String) -> Bool { body.hasPrefix(prefix) }
 
@@ -83,7 +86,7 @@ public enum NoteCrypto {
         return Data(bytes)
     }
 
-    public static func deriveKey(password: String, salt: Data) -> SymmetricKey {
+    public static func deriveKey(password: String, salt: Data, iterations: UInt32 = defaultIterations) -> SymmetricKey {
         var derived = [UInt8](repeating: 0, count: 32)
         let pw = Array(password.utf8)
         salt.withUnsafeBytes { saltPtr in

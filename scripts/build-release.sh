@@ -17,7 +17,7 @@ xcodebuild -project Axolotl.xcodeproj -scheme Axolotl-macOS -configuration Relea
   ARCHS="arm64 x86_64" ONLY_ACTIVE_ARCH=NO CODE_SIGN_IDENTITY=- CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM= \
   build -quiet
 APP="$DD/Build/Products/Release/Axolotl.app"
-codesign --force --deep --sign - "$APP"
+codesign --force --deep --options runtime --sign - "$APP"
 ditto -c -k --sequesterRsrc --keepParent "$APP" "$DIST/Axolotl-macOS.zip"
 STAGE=$(mktemp -d)
 cp -R "$APP" "$STAGE/"

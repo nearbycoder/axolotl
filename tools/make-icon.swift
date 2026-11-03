@@ -23,7 +23,7 @@ func cubic(_ p0: CGPoint, _ p1: CGPoint, _ p2: CGPoint, _ p3: CGPoint, _ t: CGFl
 
 /// A stroke along a cubic Bézier whose width tapers from `w0` to `w1`, with a round tip.
 func taperedFrond(_ p0: CGPoint, _ p1: CGPoint, _ p2: CGPoint, _ p3: CGPoint, w0: CGFloat, w1: CGFloat) -> CGPath {
-    let n = 80
+    let n = 40
     var left: [CGPoint] = [], right: [CGPoint] = []
     for i in 0...n {
         let t = CGFloat(i) / CGFloat(n)
@@ -51,7 +51,7 @@ func taperedFrond(_ p0: CGPoint, _ p1: CGPoint, _ p2: CGPoint, _ p3: CGPoint, w0
 
 func superellipse(center c: CGPoint, rx: CGFloat, ry: CGFloat, n: CGFloat, squashBottom: CGFloat = 0) -> CGPath {
     let path = CGMutablePath()
-    let steps = 360
+    let steps = 180
     for i in 0...steps {
         let t = CGFloat(i) / CGFloat(steps) * 2 * .pi
         let ct = cos(t), st = sin(t)
@@ -117,8 +117,8 @@ func squircle(_ rect: CGRect) -> CGPath {
     let path = CGMutablePath()
     let n: CGFloat = 5
     let c = CGPoint(x: rect.midX, y: rect.midY), a = rect.width / 2
-    for i in 0...720 {
-        let t = CGFloat(i) / 720 * 2 * .pi
+    for i in 0...360 {
+        let t = CGFloat(i) / 360 * 2 * .pi
         let ct = cos(t), st = sin(t)
         let p = CGPoint(x: c.x + pow(abs(ct), 2 / n) * a * (ct < 0 ? -1 : 1), y: c.y + pow(abs(st), 2 / n) * a * (st < 0 ? -1 : 1))
         if i == 0 { path.move(to: p) } else { path.addLine(to: p) }

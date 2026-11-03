@@ -78,14 +78,16 @@ struct RootView: View {
         }
         .sheet(isPresented: $nav.showPasswordSetup) {
             PasswordSetupView { password in
-                model.setEncryptionPassword(password)
-                if let id = nav.pendingLockNoteId { model.encrypt(id) }
-                nav.pendingLockNoteId = nil
+                Task {
+                    await model.setEncryptionPassword(password)
+                    if let id = nav.pendingLockNoteId { model.encrypt(id) }
+                    nav.pendingLockNoteId = nil
+                }
             }
         }
         .sheet(isPresented: $nav.showUnlockPrompt) {
             UnlockPromptView { password in
-                guard model.unlockNotes(password: password) else { return false }
+                guard await model.unlockNotes(password: password) else { return false }
                 if let id = nav.pendingLockNoteId { model.encrypt(id) }
                 nav.pendingLockNoteId = nil
                 return true
@@ -224,7 +226,8 @@ struct UnlockPromptView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var password = ""
     @State private var failed = false
-    var onUnlock: (String) -> Bool
+    @State private var working = false
+    var onUnlock: (String) async -> Bool
 
     var body: some View {
         NavigationStack {
@@ -241,13 +244,18 @@ struct UnlockPromptView: View {
             .navigationTitle("Unlock Notes")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
-                ToolbarItem(placement: .confirmationAction) { Button("Unlock", action: submit).disabled(password.isEmpty) }
+                ToolbarItem(placement: .confirmationAction) { Button("Unlock", action: submit).disabled(password.isEmpty || working) }
             }
         }
         .frame(minWidth: 340, minHeight: 200)
     }
 
     private func submit() {
-        if onUnlock(password) { dismiss() } else { failed = true }
+        guard !working else { return }
+        working = true
+        Task {
+            if await onUnlock(password) { dismiss() } else { failed = true }
+            working = false
+        }
     }
 }
