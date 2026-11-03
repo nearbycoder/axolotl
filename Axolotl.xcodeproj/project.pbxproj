@@ -18,6 +18,7 @@
 		2BC0EE38891735F8B3794E3D /* MarkdownHighlighter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 089E7666C4BD0C5F071BE981 /* MarkdownHighlighter.swift */; };
 		31C6AD8FF0DBD215E514C741 /* Security.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E93DB4C8DA8275FF6B647F /* Security.swift */; };
 		36F207CAC25618D113DB9E0F /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D3E404D3D4FA6249E379A92 /* RootView.swift */; };
+		4D8E353A772957F37F36D676 /* DemoLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24203415F5B05D3A164E8448 /* DemoLibrary.swift */; };
 		51C29219FC193B79199F9660 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE53FC7008F44AE1D49BA776 /* SettingsView.swift */; };
 		57B13EB5CD414B6151A5E8EB /* ExportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85433EC6724D2B3A51B758A2 /* ExportService.swift */; };
 		5AEC4B8C9A6906B683DAED2D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6B2FC3E1C8473335DD3CDC9F /* Assets.xcassets */; };
@@ -27,6 +28,7 @@
 		726B9EDB4EE66A1E40E8612E /* Platform.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D2D8FD8BECDB17CB41059CE /* Platform.swift */; };
 		778DCFE0492D535E698AD876 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE53FC7008F44AE1D49BA776 /* SettingsView.swift */; };
 		7B1337C037A556C8E54F071B /* AxolotlApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D5E54F4609B518F1138FA8D /* AxolotlApp.swift */; };
+		832DCD7EEB63C4C6A9F61778 /* DemoLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24203415F5B05D3A164E8448 /* DemoLibrary.swift */; };
 		89D06C628E2AE3A7FAE48C7D /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6999B1910336815B52722938 /* Theme.swift */; };
 		8C43C44F11F1C087B5FE3F51 /* MarkdownHighlighter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 089E7666C4BD0C5F071BE981 /* MarkdownHighlighter.swift */; };
 		8FD089D9DE94E2F2798D0661 /* QuickOpenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC6B1F2DC76EE9F3918E1DBB /* QuickOpenView.swift */; };
@@ -50,6 +52,7 @@
 		0D5E54F4609B518F1138FA8D /* AxolotlApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AxolotlApp.swift; sourceTree = "<group>"; };
 		0DFCDC0E4F8E27040863DB68 /* AxolotlKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = AxolotlKit; path = Packages/AxolotlKit; sourceTree = SOURCE_ROOT; };
 		2269DF5A7630468AF1CBA7A7 /* EditorScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorScreen.swift; sourceTree = "<group>"; };
+		24203415F5B05D3A164E8448 /* DemoLibrary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoLibrary.swift; sourceTree = "<group>"; };
 		296B7D8BC98C7017233588B0 /* EditorCore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorCore.swift; sourceTree = "<group>"; };
 		322021725E46FD9A85300C3C /* SidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarView.swift; sourceTree = "<group>"; };
 		348E23E94BAFB060E4DF82AA /* iOSViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iOSViews.swift; sourceTree = "<group>"; };
@@ -141,6 +144,7 @@
 				7192BEAFCCDC9EAB94170D70 /* AppModel.swift */,
 				6B2FC3E1C8473335DD3CDC9F /* Assets.xcassets */,
 				0D5E54F4609B518F1138FA8D /* AxolotlApp.swift */,
+				24203415F5B05D3A164E8448 /* DemoLibrary.swift */,
 				85433EC6724D2B3A51B758A2 /* ExportService.swift */,
 				5D2D8FD8BECDB17CB41059CE /* Platform.swift */,
 				70E93DB4C8DA8275FF6B647F /* Security.swift */,
@@ -292,6 +296,7 @@
 			files = (
 				D0A151636D58A7C98931B727 /* AppModel.swift in Sources */,
 				7B1337C037A556C8E54F071B /* AxolotlApp.swift in Sources */,
+				832DCD7EEB63C4C6A9F61778 /* DemoLibrary.swift in Sources */,
 				65DDD31BA5F870BB6365C384 /* EditorCore.swift in Sources */,
 				A61D0ECFF709AEDA3A207A74 /* EditorScreen.swift in Sources */,
 				57B13EB5CD414B6151A5E8EB /* ExportService.swift in Sources */,
@@ -314,6 +319,7 @@
 			files = (
 				FDD6E577C45CD2D404B2CCC8 /* AppModel.swift in Sources */,
 				19A03C07A097153BF2702248 /* AxolotlApp.swift in Sources */,
+				4D8E353A772957F37F36D676 /* DemoLibrary.swift in Sources */,
 				5F8794A220B1FAE9502C7863 /* EditorCore.swift in Sources */,
 				A4AE8F0657164E02C45C1333 /* EditorScreen.swift in Sources */,
 				00567FEEEE1185906FAB80E3 /* ExportService.swift in Sources */,
@@ -409,7 +415,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 4F2YLTHL8T;
 				ENABLE_NS_ASSERTIONS = NO;
@@ -425,7 +431,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.0.0;
+				MARKETING_VERSION = 1.1.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -490,7 +496,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = 4F2YLTHL8T;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -512,7 +518,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.0.0;
+				MARKETING_VERSION = 1.1.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;

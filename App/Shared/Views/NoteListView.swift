@@ -3,6 +3,7 @@ import AxolotlKit
 
 struct NoteListView: View {
     @Environment(AppModel.self) private var model
+    @Environment(\.colorScheme) private var scheme
     let nav: NavigationModel
     @State private var confirmEmptyTrash = false
     @State private var showSearchHelp = false
@@ -15,6 +16,11 @@ struct NoteListView: View {
             ForEach(notes) { note in
                 NoteRow(note: note)
                     .tag(note.id)
+                    #if os(iOS)
+                    .listRowBackground(nav.selectedNoteId == note.id
+                                       ? model.theme(for: scheme).accentSwiftUI.opacity(0.12)
+                                       : Color.clear)
+                    #endif
                     .draggable(note.id)
                     .contextMenu { NoteMenu(noteId: note.id, nav: nav) }
                     .swipeActions(edge: .leading) {
@@ -40,6 +46,8 @@ struct NoteListView: View {
             }
         }
         .listStyle(.plain)
+        .scrollContentBackground(.hidden)
+        .background(model.theme(for: scheme).backgroundSwiftUI)
         .navigationTitle(item.title)
         #if os(iOS)
         .searchable(text: $nav.search, placement: .navigationBarDrawer(displayMode: .always), prompt: "Search notes")
@@ -127,51 +135,54 @@ struct NoteRow: View {
     @Environment(AppModel.self) private var model
     let note: Note
 
+    private var dateText: String {
+        let cal = Calendar.current
+        if cal.isDateInToday(note.modified) { return note.modified.formatted(date: .omitted, time: .shortened) }
+        if cal.isDateInYesterday(note.modified) { return "Yesterday" }
+        if let days = cal.dateComponents([.day], from: note.modified, to: Date()).day, days < 7 {
+            return note.modified.formatted(.dateTime.weekday(.wide))
+        }
+        if cal.isDate(note.modified, equalTo: Date(), toGranularity: .year) { return note.modified.formatted(.dateTime.month(.abbreviated).day()) }
+        return note.modified.formatted(.dateTime.month(.abbreviated).day().year())
+    }
+
     var body: some View {
-        HStack(alignment: .top, spacing: 10) {
+        HStack(alignment: .top, spacing: 12) {
             VStack(alignment: .leading, spacing: 3) {
-                HStack(spacing: 4) {
-                    if note.pinned { Image(systemName: "pin.fill").font(.caption2).foregroundStyle(.orange) }
-                    if note.isEncrypted { Image(systemName: "lock.fill").font(.caption2).foregroundStyle(.secondary) }
-                    if note.conflictOf != nil { Image(systemName: "exclamationmark.triangle.fill").font(.caption2).foregroundStyle(.yellow) }
-                    Text(note.isUntitled ? "Untitled" : note.title)
-                        .font(.headline)
-                        .foregroundStyle(note.isUntitled ? .secondary : .primary)
-                        .lineLimit(1)
-                }
+                Text(note.isUntitled ? "Untitled" : note.title)
+                    .font(.system(.body, weight: .semibold))
+                    .foregroundStyle(note.isUntitled ? .secondary : .primary)
+                    .lineLimit(1)
                 if model.settings.previewLines > 0 {
-                    Text(note.isEncrypted ? "Locked" : (note.meta.preview.isEmpty ? " " : note.meta.preview))
+                    Text(note.isEncrypted ? "Locked note" : (note.meta.preview.isEmpty ? "No additional text" : note.meta.preview))
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                         .lineLimit(model.settings.previewLines)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
-                HStack(spacing: 6) {
-                    Text(Calendar.current.isDateInToday(note.modified)
-                         ? note.modified.formatted(date: .omitted, time: .shortened)
-                         : note.modified.formatted(.dateTime.month(.abbreviated).day().year()))
-                        .layoutPriority(1)
-                    let todos = note.meta.openTodos + note.meta.doneTodos
-                    if todos > 0 {
-                        Label("\(note.meta.doneTodos)/\(todos)", systemImage: "checkmark.square").labelStyle(.titleAndIcon)
-                    }
-                    if !note.meta.tags.isEmpty {
-                        Text(note.meta.tags.prefix(3).map { "#\($0)" }.joined(separator: " ")).lineLimit(1)
-                    }
+                HStack(spacing: 5) {
+                    Text(dateText)
+                    if note.pinned { Image(systemName: "pin.fill").imageScale(.small) }
+                    if note.isEncrypted { Image(systemName: "lock.fill").imageScale(.small) }
+                    if note.meta.openTodos > 0 { Image(systemName: "circle.dashed").imageScale(.small) }
+                    if note.conflictOf != nil { Image(systemName: "exclamationmark.triangle.fill").imageScale(.small).foregroundStyle(.yellow) }
                 }
                 .font(.caption)
                 .foregroundStyle(.tertiary)
-                .lineLimit(1)
+                .padding(.top, 1)
             }
             Spacer(minLength: 0)
             if model.settings.showListImages, let first = note.meta.imageIds.first, let img = model.image(for: first) {
                 Image(platformImage: img)
                     .resizable()
                     .scaledToFill()
-                    .frame(width: 52, height: 52)
-                    .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                    .frame(width: 48, height: 48)
+                    .clipShape(RoundedRectangle(cornerRadius: 9, style: .continuous))
+                    .overlay(RoundedRectangle(cornerRadius: 9, style: .continuous).strokeBorder(.primary.opacity(0.08)))
             }
         }
-        .padding(.vertical, 4)
+        .padding(.vertical, 7)
+        .contentShape(Rectangle())
     }
 }
 

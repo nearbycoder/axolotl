@@ -50,7 +50,9 @@ struct SidebarView: View {
         #if os(macOS)
         .listStyle(.sidebar)
         #endif
-        .safeAreaInset(edge: .bottom) { SyncStatusBar() }
+        .scrollContentBackground(.hidden)
+        .background(model.theme(for: scheme).sidebarSwiftUI)
+        .safeAreaInset(edge: .bottom, spacing: 0) { SyncStatusBar() }
         .toolbar {
             #if os(iOS)
             ToolbarItem(placement: .topBarLeading) {
@@ -86,7 +88,7 @@ struct SidebarView: View {
 
     private func row(_ item: SidebarItem) -> some View {
         Label(item.title, systemImage: item.symbol)
-            .badge(item == .notes || item == .todo || item == .today ? model.count(for: item) : 0)
+            .badge(item == .notes || item == .todo ? model.count(for: item) : 0)
             .tag(item)
             .contextMenu {
                 if item == .trash {
@@ -139,6 +141,7 @@ struct IdentifiedString: Identifiable {
 
 struct SyncStatusBar: View {
     @Environment(AppModel.self) private var model
+    @Environment(\.colorScheme) private var scheme
 
     var body: some View {
         let sync = model.sync
@@ -157,9 +160,10 @@ struct SyncStatusBar: View {
                     .help("Sync now")
             }
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 8)
-        .background(.bar)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
+        .background(model.theme(for: scheme).sidebarSwiftUI)
+        .overlay(alignment: .top) { Divider().opacity(0.6) }
     }
 
     private var icon: String {

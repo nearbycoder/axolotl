@@ -34,6 +34,10 @@ struct Theme: Identifiable, Hashable {
     var secondarySwiftUI: Color { Color(secondaryColor) }
 
     static let all: [Theme] = [
+        Theme(id: "axolotl", name: "Axolotl", isDark: false, background: "#FFFFFF", sidebar: "#F7F4F6", text: "#2F2B33", secondary: "#9A929D",
+              accent: "#E14F78", heading: "#1E1A22", code: "#C2386A", codeBackground: "#F6F2F4", highlight: "#FFEAA6", link: "#D9466F", quote: "#7C7380"),
+        Theme(id: "axolotl-night", name: "Axolotl Night", isDark: true, background: "#1C1620", sidebar: "#151018", text: "#E7DFEA", secondary: "#8A7E8F",
+              accent: "#FF7A9C", heading: "#FFFFFF", code: "#FFA3BA", codeBackground: "#271E2B", highlight: "#5E4320", link: "#FF8FAD", quote: "#A396A8"),
         Theme(id: "red-graphite", name: "Red Graphite", isDark: false, background: "#FFFFFF", sidebar: "#F4F4F4", text: "#404040", secondary: "#9C9C9C",
               accent: "#DD4C4F", heading: "#2F2F2F", code: "#D0484B", codeBackground: "#F5F5F5", highlight: "#FFF09A", link: "#DD4C4F", quote: "#7A7A7A"),
         Theme(id: "dark-graphite", name: "Dark Graphite", isDark: true, background: "#232325", sidebar: "#1B1B1D", text: "#D9D9D9", secondary: "#7E7E82",
@@ -64,8 +68,6 @@ struct Theme: Identifiable, Hashable {
               accent: "#EBBCBA", heading: "#C4A7E7", code: "#F6C177", codeBackground: "#26233A", highlight: "#5A4A33", link: "#9CCFD8", quote: "#908CAA"),
         Theme(id: "rose-pine-dawn", name: "Rosé Pine Dawn", isDark: false, background: "#FAF4ED", sidebar: "#F2E9E1", text: "#575279", secondary: "#9893A5",
               accent: "#D7827E", heading: "#907AA9", code: "#B4637A", codeBackground: "#F2E9E1", highlight: "#F6E1B5", link: "#286983", quote: "#797593"),
-        Theme(id: "axolotl", name: "Axolotl", isDark: false, background: "#FFFBFC", sidebar: "#FBEFF2", text: "#3E3A45", secondary: "#A396A4",
-              accent: "#E8638B", heading: "#2D2A33", code: "#0D9488", codeBackground: "#F3ECEF", highlight: "#FFE7A3", link: "#0D9488", quote: "#8A7F8C"),
     ]
 
     static func named(_ id: String) -> Theme { all.first { $0.id == id } ?? all[0] }
@@ -144,6 +146,7 @@ final class AppSettings {
     var typewriterMode: Bool { didSet { defaults.set(typewriterMode, forKey: "typewriter") } }
     var spellCheck: Bool { didSet { defaults.set(spellCheck, forKey: "spellCheck") } }
     var dimMarkdown: Bool { didSet { defaults.set(dimMarkdown, forKey: "dimMarkdown") } }
+    var hideMarkdown: Bool { didSet { defaults.set(hideMarkdown, forKey: "hideMarkdown") } }
     var sortOrder: SortOrder { didSet { defaults.set(sortOrder.rawValue, forKey: "sortOrder") } }
     var previewLines: Int { didSet { defaults.set(previewLines, forKey: "previewLines") } }
     var showListImages: Bool { didSet { defaults.set(showListImages, forKey: "showListImages") } }
@@ -153,9 +156,9 @@ final class AppSettings {
 
     init() {
         defaults.register(defaults: [
-            "lightTheme": "red-graphite", "darkTheme": "dark-graphite", "appearance": "system", "font": "system",
+            "lightTheme": "axolotl", "darkTheme": "axolotl-night", "appearance": "system", "font": "system",
             "fontSize": 17.0, "lineHeight": 1.35, "paragraphSpacing": 6.0, "lineWidth": 720.0, "typewriter": false,
-            "spellCheck": true, "dimMarkdown": true, "sortOrder": "modified", "previewLines": 2, "showListImages": true,
+            "spellCheck": true, "dimMarkdown": true, "hideMarkdown": true, "sortOrder": "modified", "previewLines": 2, "showListImages": true,
             "appLock": false, "autoLockMinutes": 5, "keepTagsOnExport": true,
         ])
         lightThemeId = defaults.string(forKey: "lightTheme")!
@@ -169,6 +172,7 @@ final class AppSettings {
         typewriterMode = defaults.bool(forKey: "typewriter")
         spellCheck = defaults.bool(forKey: "spellCheck")
         dimMarkdown = defaults.bool(forKey: "dimMarkdown")
+        hideMarkdown = defaults.bool(forKey: "hideMarkdown")
         sortOrder = SortOrder(rawValue: defaults.string(forKey: "sortOrder")!) ?? .modified
         previewLines = defaults.integer(forKey: "previewLines")
         showListImages = defaults.bool(forKey: "showListImages")

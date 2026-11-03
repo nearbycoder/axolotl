@@ -76,10 +76,12 @@ struct EditorStyleKey: Equatable {
     var lineHeight: CGFloat
     var paragraphSpacing: CGFloat
     var dimMarkdown: Bool
+    var hideMarkdown: Bool
 
     var style: EditorStyle {
         EditorStyle(theme: Theme.named(themeId), font: EditorFont.all.first { $0.id == fontId } ?? EditorFont.all[0],
-                    fontSize: fontSize, lineHeight: lineHeight, paragraphSpacing: paragraphSpacing, dimMarkdown: dimMarkdown)
+                    fontSize: fontSize, lineHeight: lineHeight, paragraphSpacing: paragraphSpacing, dimMarkdown: dimMarkdown,
+                    hideMarkdown: hideMarkdown)
     }
 }
 
@@ -89,6 +91,7 @@ class EditorCoordinatorBase: NSObject {
     let storage: MarkdownTextStorage
     let layout: MarkdownLayoutManager
     let container: NSTextContainer
+    let hider = MarkupHider()
     var noteId: String
     var lastMarkdown: String
     var config: EditorConfig
@@ -106,6 +109,7 @@ class EditorCoordinatorBase: NSObject {
         layout.allowsNonContiguousLayout = false
         storage.addLayoutManager(layout)
         layout.addTextContainer(container)
+        layout.delegate = hider
         self.noteId = noteId
         self.lastMarkdown = markdown
         self.config = config
@@ -119,6 +123,7 @@ class EditorCoordinatorBase: NSObject {
 
     func load(_ markdown: String) {
         isLoading = true
+        hider.revealed = NSRange(location: NSNotFound, length: 0)
         storage.setAttributedString(EditorDocument.attributed(from: markdown, style: style, image: callbacks.image))
         storage.rehighlightAll()
         lastMarkdown = markdown
@@ -183,6 +188,36 @@ class EditorCoordinatorBase: NSObject {
 
     /// Hook for subclasses (iOS swaps the keyboard bar).
     func completionChanged() {}
+
+    /// Shows Markdown syntax only on the paragraph(s) holding the caret while editing.
+    func updateReveal(selection: NSRange, focused: Bool) {
+        let text = storage.string as NSString
+        var next = NSRange(location: NSNotFound, length: 0)
+        if focused, selection.location != NSNotFound, selection.location <= text.length {
+            next = text.paragraphRange(for: NSRange(location: selection.location, length: min(selection.length, text.length - selection.location)))
+            if next.length == 0 { next = NSRange(location: selection.location, length: 0) }
+        }
+        let old = hider.revealed
+        guard old.location != next.location || old.length != next.length else { return }
+        hider.revealed = next
+        for r in [old, next] where r.location != NSNotFound {
+            let clamped = NSIntersectionRange(r, NSRange(location: 0, length: storage.length))
+            guard clamped.length > 0 else { continue }
+            layout.invalidateGlyphs(forCharacterRange: clamped, changeInLength: 0, actualCharacterRange: nil)
+            layout.invalidateLayout(forCharacterRange: clamped, actualCharacterRange: nil)
+            layout.invalidateDisplay(forCharacterRange: clamped)
+        }
+    }
+
+    /// Body attributes for typing on an empty line, so the caret isn't sized like the heading above.
+    func typingAttributes(at selection: NSRange) -> [NSAttributedString.Key: Any]? {
+        let text = storage.string as NSString
+        guard selection.length == 0, selection.location <= text.length else { return nil }
+        let para = text.paragraphRange(for: NSRange(location: selection.location, length: 0))
+        let content = text.substring(with: para).trimmingCharacters(in: .newlines)
+        guard content.isEmpty else { return nil }
+        return [.font: style.bodyFont, .foregroundColor: style.theme.textColor, .paragraphStyle: MarkdownHighlighter.paragraphStyle(style)]
+    }
 
     func storageLocation(forMarkdown location: Int) -> Int {
         var shift = 0
@@ -256,6 +291,9 @@ final class AxTextView: UITextView {
     var onShiftTab: (() -> Void)?
     var maxLineWidth: CGFloat = 720
     weak var ownTap: UITapGestureRecognizer?
+    let placeholderLabel = UILabel()
+
+    func updatePlaceholder() { placeholderLabel.isHidden = !textStorage.string.isEmpty }
 
     override func gestureRecognizerShouldBegin(_ g: UIGestureRecognizer) -> Bool {
         if g !== ownTap, g is UITapGestureRecognizer, let interactive, interactive(g.location(in: self)) { return false }
@@ -288,11 +326,18 @@ final class AxTextView: UITextView {
 
     override func layoutSubviews() {
         super.layoutSubviews()
-        let horizontal = max(16, (bounds.width - maxLineWidth) / 2)
+        let horizontal = max(20, (bounds.width - maxLineWidth) / 2)
         if abs(textContainerInset.left - horizontal) > 0.5 {
             textContainerInset = UIEdgeInsets(top: textContainerInset.top, left: horizontal, bottom: textContainerInset.bottom, right: horizontal)
         }
+        if placeholderLabel.superview == nil { addSubview(placeholderLabel) }
+        placeholderLabel.sizeToFit()
+        placeholderLabel.frame.origin = CGPoint(x: textContainerInset.left + textContainer.lineFragmentPadding, y: textContainerInset.top)
     }
+}
+
+extension UITextView {
+    func invalidatePlaceholder() { (self as? AxTextView)?.updatePlaceholder() }
 }
 
 /// Keyboard accessory with formatting buttons, or tag / link suggestions while completing.
@@ -434,6 +479,7 @@ struct MarkdownEditor: UIViewRepresentable {
             tv.selectedRange = c.applyExternal(markdown, selection: tv.selectedRange)
             tv.undoManager?.removeAllActions()
         }
+        tv.updatePlaceholder()
         if c.applyConfig(config) { c.applyAppearance() }
         if let bar = c.bar { bar.onAttach = onAttachRequest }
     }
@@ -457,6 +503,10 @@ struct MarkdownEditor: UIViewRepresentable {
             tv.autocorrectionType = config.spellCheck ? .default : .no
             tv.keyboardAppearance = theme.isDark ? .dark : .default
             tv.typingAttributes = [.font: style.bodyFont, .foregroundColor: theme.textColor]
+            tv.placeholderLabel.text = "Start writing…"
+            tv.placeholderLabel.font = style.bodyFont
+            tv.placeholderLabel.textColor = theme.secondaryColor.withAlpha(0.7)
+            tv.updatePlaceholder()
             bar?.tint = theme.accentColor
             tv.setNeedsLayout()
             if config.typewriter {
@@ -551,19 +601,27 @@ struct MarkdownEditor: UIViewRepresentable {
         func textViewDidChange(_ textView: UITextView) {
             userDidEdit()
             updateCompletion(selection: textView.selectedRange)
+            updateReveal(selection: textView.selectedRange, focused: textView.isFirstResponder)
+            textView.invalidatePlaceholder()
             typewriterScroll()
         }
 
         func textViewDidChangeSelection(_ textView: UITextView) {
             guard !isLoading else { return }
             updateCompletion(selection: textView.selectedRange)
+            updateReveal(selection: textView.selectedRange, focused: textView.isFirstResponder)
+            if let attrs = typingAttributes(at: textView.selectedRange) { textView.typingAttributes = attrs }
             typewriterScroll()
         }
 
-        func textViewDidBeginEditing(_ textView: UITextView) { controller.isFocused = true }
+        func textViewDidBeginEditing(_ textView: UITextView) {
+            controller.isFocused = true
+            updateReveal(selection: textView.selectedRange, focused: true)
+        }
 
         func textViewDidEndEditing(_ textView: UITextView) {
             controller.isFocused = false
+            updateReveal(selection: textView.selectedRange, focused: false)
             flushPendingSave()
         }
 
@@ -650,8 +708,16 @@ final class AxNSTextView: NSTextView {
         super.mouseDown(with: event)
     }
 
-    override func resetCursorRects() {
-        super.resetCursorRects()
+    override func becomeFirstResponder() -> Bool {
+        let ok = super.becomeFirstResponder()
+        if ok { coordinator?.updateReveal(selection: selectedRange(), focused: true) }
+        return ok
+    }
+
+    override func resignFirstResponder() -> Bool {
+        let ok = super.resignFirstResponder()
+        if ok { coordinator?.updateReveal(selection: selectedRange(), focused: false) }
+        return ok
     }
 
     override func paste(_ sender: Any?) {
@@ -761,6 +827,8 @@ struct MarkdownEditor: NSViewRepresentable {
             tv.isContinuousSpellCheckingEnabled = config.spellCheck
             tv.isGrammarCheckingEnabled = false
             tv.typingAttributes = [.font: style.bodyFont, .foregroundColor: theme.textColor]
+            tv.setValue(NSAttributedString(string: "Start writing…", attributes: [.font: style.bodyFont, .foregroundColor: theme.secondaryColor.withAlpha(0.7)]),
+                        forKey: "placeholderAttributedString")
             tv.maxLineWidth = config.lineWidth
             tv.textContainerInset = .zero
             tv.updateInsets()
@@ -863,13 +931,18 @@ struct MarkdownEditor: NSViewRepresentable {
 
         func textDidChange(_ notification: Notification) {
             userDidEdit()
-            if let tv = textView { updateCompletion(selection: tv.selectedRange()) }
+            if let tv = textView {
+                updateCompletion(selection: tv.selectedRange())
+                updateReveal(selection: tv.selectedRange(), focused: true)
+            }
             typewriterScroll()
         }
 
         func textViewDidChangeSelection(_ notification: Notification) {
             guard !isLoading, let tv = textView else { return }
             updateCompletion(selection: tv.selectedRange())
+            updateReveal(selection: tv.selectedRange(), focused: tv.window?.firstResponder === tv)
+            if let attrs = typingAttributes(at: tv.selectedRange()) { tv.typingAttributes = attrs }
         }
 
         func textDidBeginEditing(_ notification: Notification) { controller.isFocused = true }

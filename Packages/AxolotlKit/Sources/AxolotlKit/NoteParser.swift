@@ -130,10 +130,18 @@ public enum NoteParser {
         if titleLineEnd < text.length {
             let rest = text.substring(from: titleLineEnd)
             var preview = ""
+            var inFence = false
             for line in rest.split(separator: "\n", omittingEmptySubsequences: true) {
-                let cleaned = cleanInline(stripHeadingMarker(String(line).trimmingCharacters(in: .whitespaces)))
-                if cleaned.isEmpty || cleaned.hasPrefix("```") { continue }
-                preview += (preview.isEmpty ? "" : " ") + cleaned
+                let raw = String(line).trimmingCharacters(in: .whitespaces)
+                if raw.hasPrefix("```") || raw.hasPrefix("~~~") { inFence.toggle(); continue }
+                // Previews read best as prose: skip code, headings, table rules and tag-only lines.
+                if inFence || raw.hasPrefix("#") && (raw.dropFirst().first == "#" || raw.dropFirst().first == " ") { continue }
+                if raw.hasPrefix("|") && raw.contains("---") { continue }
+                if raw.split(separator: " ").allSatisfy({ $0.hasPrefix("#") }) { continue }
+                var cleaned = cleanInline(stripHeadingMarker(raw))
+                if raw.hasPrefix("|") { cleaned = raw.split(separator: "|").map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }.joined(separator: ", ") }
+                if cleaned.isEmpty || cleaned.hasPrefix("[!") { continue }
+                preview += (preview.isEmpty ? "" : " · ") + cleaned
                 if preview.count > 240 { break }
             }
             meta.preview = String(preview.prefix(240))

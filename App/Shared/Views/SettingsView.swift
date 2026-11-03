@@ -52,10 +52,15 @@ struct GeneralSettings: View {
             Stepper("Preview lines: \(s.previewLines)", value: $s.previewLines, in: 0...4)
             Toggle("Show image thumbnails", isOn: $s.showListImages)
         }
-        Section("Editor") {
+        Section {
             Toggle("Typewriter mode", isOn: $s.typewriterMode)
             Toggle("Check spelling", isOn: $s.spellCheck)
+            Toggle("Hide Markdown syntax", isOn: $s.hideMarkdown)
             Toggle("Dim Markdown markers", isOn: $s.dimMarkdown)
+        } header: {
+            Text("Editor")
+        } footer: {
+            Text("With syntax hidden, Markdown characters like ** and # appear only on the line you're editing.")
         }
     }
 }

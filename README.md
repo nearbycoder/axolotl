@@ -11,7 +11,7 @@
 ## Features
 
 **Writing**
-- Live Markdown editor that styles as you type: headings, **bold**, *italic*, ~~strikethrough~~, ==highlight==, ~underline~, `code`, quotes, callouts (`> [!NOTE]`), tables, footnotes, inline math, horizontal rules
+- Live Markdown editor that styles as you type and hides the syntax except on the line you're editing: headings, **bold**, *italic*, ~~strikethrough~~, ==highlight==, ~underline~, `code`, quotes, callouts (`> [!NOTE]`), tables, footnotes, inline math, horizontal rules
 - Real checkboxes for `- [ ]` todos, bullets for lists, automatic list continuation, Tab / Shift-Tab to indent
 - Fenced code blocks with syntax highlighting
 - Inline images, file attachments, drag and drop, paste images, photo picker
@@ -43,7 +43,7 @@
 - `axolotl://` URL scheme with Bear-style x-callback-url actions (`create`, `open-note`, `add-text`, `search`, `open-tag`)
 
 **Themes**
-Red Graphite, Dark Graphite, High Contrast, Charcoal, Solarized Light/Dark, Dracula, Nord, Tokyo Night, Gruvbox, Catppuccin Latte/Mocha, Everforest, Rosé Pine, Rosé Pine Dawn and Axolotl, with separate light and dark choices.
+Axolotl and Axolotl Night, plus Red Graphite, Dark Graphite, High Contrast, Charcoal, Solarized Light/Dark, Dracula, Nord, Tokyo Night, Gruvbox, Catppuccin Latte/Mocha, Everforest, Rosé Pine and Rosé Pine Dawn, with separate light and dark choices.
 
 ## Sync
 

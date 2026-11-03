@@ -112,7 +112,7 @@ struct EditorScreen: View {
         let s = model.settings
         return EditorConfig(
             style: EditorStyleKey(themeId: theme.id, fontId: s.fontId, fontSize: s.fontSize, lineHeight: s.lineHeight,
-                                  paragraphSpacing: s.paragraphSpacing, dimMarkdown: s.dimMarkdown),
+                                  paragraphSpacing: s.paragraphSpacing, dimMarkdown: s.dimMarkdown, hideMarkdown: s.hideMarkdown),
             typewriter: s.typewriterMode, spellCheck: s.spellCheck, lineWidth: s.lineWidth, imagesVersion: model.imagesVersion)
     }
 

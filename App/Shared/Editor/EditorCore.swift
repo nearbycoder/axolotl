@@ -77,6 +77,32 @@ final class MarkdownTextStorage: NSTextStorage {
     }
 }
 
+/// Hides Markdown syntax glyphs outside the paragraph being edited.
+final class MarkupHider: NSObject, NSLayoutManagerDelegate {
+    /// Character range shown with full syntax (the caret's paragraph), or NSNotFound.
+    var revealed = NSRange(location: NSNotFound, length: 0)
+
+    func layoutManager(_ layoutManager: NSLayoutManager, shouldGenerateGlyphs glyphs: UnsafePointer<CGGlyph>,
+                       properties props: UnsafePointer<NSLayoutManager.GlyphProperty>, characterIndexes charIndexes: UnsafePointer<Int>,
+                       font aFont: PlatformFont, forGlyphRange glyphRange: NSRange) -> Int {
+        guard let storage = layoutManager.textStorage else { return 0 }
+        var changed: [NSLayoutManager.GlyphProperty]?
+        let length = storage.length
+        for i in 0..<glyphRange.length {
+            let ci = charIndexes[i]
+            guard ci < length, revealed.location == NSNotFound || !NSLocationInRange(ci, revealed),
+                  storage.attribute(.axHidden, at: ci, effectiveRange: nil) != nil else { continue }
+            if changed == nil { changed = Array(UnsafeBufferPointer(start: props, count: glyphRange.length)) }
+            changed![i] = .null
+        }
+        guard let changed else { return 0 }
+        changed.withUnsafeBufferPointer { buffer in
+            layoutManager.setGlyphs(glyphs, properties: buffer.baseAddress!, characterIndexes: charIndexes, font: aFont, forGlyphRange: glyphRange)
+        }
+        return glyphRange.length
+    }
+}
+
 /// Inline image that scales to the text column.
 final class ImageAttachment: NSTextAttachment {
     var attachmentId = ""
@@ -149,14 +175,20 @@ final class MarkdownLayoutManager: NSLayoutManager {
             ctx.fillPath()
         }
 
+        var handledQuotes = Set<Int>()
         storage.enumerateAttribute(.axQuote, in: charRange) { value, range, _ in
             guard let color = value as? PlatformColor else { return }
-            for r in lineRects(for: range, in: container) {
-                let bar = CGRect(x: origin.x + r.minX + padding + 2, y: origin.y + r.minY, width: 3, height: r.height)
-                ctx.setFillColor(color.cgColor)
-                ctx.addPath(CGPath(roundedRect: bar, cornerWidth: 1.5, cornerHeight: 1.5, transform: nil))
-                ctx.fillPath()
-            }
+            // One continuous bar per quote block, spanning paragraph spacing between its lines.
+            var block = NSRange()
+            _ = storage.attribute(.axQuote, at: range.location, longestEffectiveRange: &block, in: full)
+            guard handledQuotes.insert(block.location).inserted else { return }
+            let rects = lineRects(for: block, in: container)
+            guard let first = rects.first, let last = rects.last else { return }
+            let bottom = last.maxY - ((storage.attribute(.paragraphStyle, at: max(block.location, NSMaxRange(block) - 1), effectiveRange: nil) as? NSParagraphStyle)?.paragraphSpacing ?? 0)
+            let bar = CGRect(x: origin.x + first.minX + padding + 2, y: origin.y + first.minY + 3, width: 3, height: max(4, bottom - first.minY - 6))
+            ctx.setFillColor(color.cgColor)
+            ctx.addPath(CGPath(roundedRect: bar, cornerWidth: 1.5, cornerHeight: 1.5, transform: nil))
+            ctx.fillPath()
         }
 
         storage.enumerateAttribute(.axRule, in: charRange) { value, range, _ in

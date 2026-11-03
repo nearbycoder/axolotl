@@ -97,6 +97,9 @@ final class AppModel {
             seedWelcomeNotes()
             replica.setKV("seeded", "1")
         }
+        #if DEBUG
+        if ProcessInfo.processInfo.environment["AXOLOTL_DEMO"] == "1" { loadDemoLibrary() }
+        #endif
     }
 
     private func reloadAll() {
@@ -540,6 +543,11 @@ final class AppModel {
             navigationRequest = NavigationRequest(sidebar: .today)
         case "todo":
             navigationRequest = NavigationRequest(sidebar: .todo)
+        #if DEBUG
+        case "debug-demo":
+            loadDemoLibrary()
+            navigationRequest = NavigationRequest(sidebar: .notes, noteId: liveNotes.first { $0.pinned }?.id)
+        #endif
         default:
             break
         }

@@ -29,6 +29,8 @@ extension NSAttributedString.Key {
     static let axAttachmentSource = NSAttributedString.Key("axAttachmentSource")
     /// Attachment id for file links.
     static let axFile = NSAttributedString.Key("axFile")
+    /// Markdown syntax that is hidden unless the caret is on its line.
+    static let axHidden = NSAttributedString.Key("axHidden")
 }
 
 /// Appearance inputs for highlighting.
@@ -39,6 +41,7 @@ struct EditorStyle {
     var lineHeight: CGFloat
     var paragraphSpacing: CGFloat
     var dimMarkdown: Bool
+    var hideMarkdown: Bool = true
 
     var bodyFont: PlatformFont { font.font(size: fontSize) }
     var codeFont: PlatformFont { .monospaced(size: fontSize * 0.88) }
@@ -95,6 +98,10 @@ enum MarkdownHighlighter {
         func inFence(_ loc: Int) -> Bool { fencedBlocks.contains { NSLocationInRange(loc, $0) } }
         func inCode(_ r: NSRange) -> Bool { codeRanges.contains { NSIntersectionRange($0, r).length > 0 } }
         let marker = style.markerColor
+        func hide(_ r: NSRange) {
+            guard style.hideMarkdown, r.length > 0, r.location != NSNotFound else { return }
+            storage.addAttribute(.axHidden, value: true, range: r)
+        }
 
         // Block-level styling, paragraph by paragraph.
         var loc = range.location
@@ -111,6 +118,11 @@ enum MarkdownHighlighter {
                 let trimmed = content.trimmingCharacters(in: .whitespaces)
                 if trimmed.hasPrefix("```") || trimmed.hasPrefix("~~~") {
                     storage.addAttribute(.foregroundColor, value: marker, range: contentRange)
+                    // The fence itself hides; a language name stays as a small label.
+                    let leading = (content.prefix { $0 == " " || $0 == "\t" } as Substring).utf16.count
+                    hide(NSRange(location: contentRange.location + leading, length: 3))
+                    storage.addAttributes([.font: PlatformFont.systemFont(ofSize: style.fontSize * 0.72, weight: .semibold), .kern: 0.6],
+                                          range: NSRange(location: contentRange.location + leading + 3, length: max(0, contentRange.length - leading - 3)))
                 } else {
                     highlightCode(storage, contentRange, style)
                 }
@@ -123,6 +135,7 @@ enum MarkdownHighlighter {
                                        .paragraphStyle: paragraphStyle(style, spacingBefore: style.paragraphSpacing * (level <= 2 ? 1.5 : 0.8))], range: para)
                 storage.addAttributes([.foregroundColor: marker, .font: style.headingFont(level).withSize(style.fontSize * 0.8)],
                                       range: NSRange(location: m.range(at: 1).location, length: m.range(at: 1).length + 1))
+                hide(NSRange(location: m.range(at: 1).location, length: m.range(at: 2).location - m.range(at: 1).location))
             } else if MarkdownSyntax.hr.firstMatch(in: text as String, range: contentRange) != nil {
                 storage.addAttributes([.foregroundColor: PlatformColor.clear, .axRule: true], range: contentRange)
             } else if let q = MarkdownSyntax.quote.firstMatch(in: text as String, range: contentRange), q.range.location == para.location {
@@ -130,6 +143,9 @@ enum MarkdownHighlighter {
                 if let c = MarkdownSyntax.callout.firstMatch(in: text as String, range: contentRange) {
                     barColor = calloutColor(text.substring(with: c.range(at: 1)), theme)
                     storage.addAttributes([.foregroundColor: barColor, .font: body.withTraits(bold: true)], range: c.range)
+                    let kind = c.range(at: 1)
+                    hide(NSRange(location: kind.location - 2, length: 2))
+                    hide(NSRange(location: NSMaxRange(kind), length: 1))
                 } else if let kind = calloutKind(endingBefore: para.location, in: text) {
                     // Continuation line of a callout keeps its color.
                     barColor = calloutColor(kind, theme)
@@ -149,7 +165,9 @@ enum MarkdownHighlighter {
                 storage.addAttributes([.paragraphStyle: paragraphStyle(style, headIndent: indentWidth + markerWidth, firstIndent: 0)], range: para)
                 storage.addAttributes([.foregroundColor: PlatformColor.clear, .axTodo: checked], range: markerRange)
                 if checked {
-                    let rest = NSRange(location: NSMaxRange(markerRange), length: NSMaxRange(contentRange) - NSMaxRange(markerRange))
+                    var start = NSMaxRange(markerRange)
+                    while start < NSMaxRange(contentRange), text.character(at: start) == 32 { start += 1 }
+                    let rest = NSRange(location: start, length: NSMaxRange(contentRange) - start)
                     if rest.length > 0 {
                         storage.addAttributes([.foregroundColor: theme.secondaryColor, .strikethroughStyle: NSUnderlineStyle.single.rawValue,
                                                .strikethroughColor: theme.secondaryColor], range: rest)
@@ -188,6 +206,8 @@ enum MarkdownHighlighter {
         func dimMarkers(_ m: NSTextCheckingResult, _ length: Int) {
             storage.addAttribute(.foregroundColor, value: marker, range: NSRange(location: m.range.location, length: length))
             storage.addAttribute(.foregroundColor, value: marker, range: NSRange(location: NSMaxRange(m.range) - length, length: length))
+            hide(NSRange(location: m.range.location, length: length))
+            hide(NSRange(location: NSMaxRange(m.range) - length, length: length))
         }
         func addTrait(_ r: NSRange, bold: Bool = false, italic: Bool = false) {
             storage.enumerateAttribute(.font, in: r) { value, sub, _ in
@@ -233,6 +253,8 @@ enum MarkdownHighlighter {
                                        .underlineColor: theme.linkColor.withAlpha(0.4)], range: m.range(at: 1))
                 storage.removeAttribute(.underlineStyle, range: m.range(at: 2))
             }
+            hide(NSRange(location: m.range.location, length: 1))
+            hide(NSRange(location: NSMaxRange(m.range(at: 1)), length: NSMaxRange(m.range) - NSMaxRange(m.range(at: 1))))
         }
         each(MarkdownSyntax.image) { m in
             storage.addAttribute(.foregroundColor, value: marker, range: m.range)
@@ -251,6 +273,8 @@ enum MarkdownHighlighter {
             storage.addAttributes([.font: style.codeFont, .foregroundColor: theme.codeColor, .axInlineCode: true], range: r)
             storage.addAttribute(.foregroundColor, value: marker, range: NSRange(location: r.location, length: 1))
             storage.addAttribute(.foregroundColor, value: marker, range: NSRange(location: NSMaxRange(r) - 1, length: 1))
+            hide(NSRange(location: r.location, length: 1))
+            hide(NSRange(location: NSMaxRange(r) - 1, length: 1))
         }
     }
 
