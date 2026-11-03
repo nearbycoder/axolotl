@@ -39,5 +39,14 @@ jobs:
       - run: sudo xcode-select -s "$(ls -d /Applications/Xcode*.app | sort -V | tail -1)"
       - name: macOS build and tests
         run: xcodebuild -project Axolotl.xcodeproj -scheme Axolotl-macOS -destination 'platform=macOS' CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM= test -quiet
+      - name: MCP end to end
+        run: |
+          xcodebuild -project Axolotl.xcodeproj -scheme Axolotl-macOS -configuration Debug -derivedDataPath build/e2e CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM= build -quiet
+          export AXOLOTL_DATA_DIR="$RUNNER_TEMP/axo" AXOLOTL_NO_LAUNCH=1
+          APP="$PWD/build/e2e/Build/Products/Debug/Axolotl.app"
+          AXOLOTL_DATA_DIR="$AXOLOTL_DATA_DIR" "$APP/Contents/MacOS/Axolotl" > "$RUNNER_TEMP/app.log" 2>&1 &
+          for i in $(seq 1 60); do "$APP/Contents/Helpers/axolotl" version >/dev/null && "$APP/Contents/Helpers/axolotl" list --limit 1 >/dev/null 2>&1 && break; sleep 1; done
+          python3 scripts/test-mcp.py "$APP/Contents/Helpers/axolotl"
+          kill %1 || true
       - name: iOS
         run: xcodebuild -project Axolotl.xcodeproj -scheme Axolotl-iOS -destination 'generic/platform=iOS' CODE_SIGNING_ALLOWED=NO DEVELOPMENT_TEAM= build -quiet

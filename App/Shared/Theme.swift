@@ -133,7 +133,14 @@ struct EditorFont: Identifiable, Hashable {
 @MainActor
 @Observable
 final class AppSettings {
-    private let defaults = UserDefaults.standard
+    /// Unit tests run inside the app; give them their own preferences so they never touch the user's.
+    private let defaults: UserDefaults = {
+        let env = ProcessInfo.processInfo.environment
+        guard env["XCTestConfigurationFilePath"] != nil || env["XCTestBundlePath"] != nil else { return .standard }
+        let suite = UserDefaults(suiteName: "com.nearbycoder.axolotl.tests")!
+        suite.removePersistentDomain(forName: "com.nearbycoder.axolotl.tests")
+        return suite
+    }()
 
     var lightThemeId: String { didSet { defaults.set(lightThemeId, forKey: "lightTheme") } }
     var darkThemeId: String { didSet { defaults.set(darkThemeId, forKey: "darkTheme") } }
@@ -154,6 +161,10 @@ final class AppSettings {
     var autoLockMinutes: Int { didSet { defaults.set(autoLockMinutes, forKey: "autoLockMinutes") } }
     var keepTagsOnExport: Bool { didSet { defaults.set(keepTagsOnExport, forKey: "keepTagsOnExport") } }
     var biometricUnlock: Bool { didSet { defaults.set(biometricUnlock, forKey: "biometricUnlock") } }
+    /// Lets local AI agents and the `axolotl` command line tool talk to the app (macOS).
+    var agentAccess: Bool { didSet { defaults.set(agentAccess, forKey: "agentAccess") } }
+    /// Lets agents read and edit locked notes while they are unlocked in the app.
+    var agentsReadLockedNotes: Bool { didSet { defaults.set(agentsReadLockedNotes, forKey: "agentsReadLockedNotes") } }
 
     init() {
         defaults.register(defaults: [
@@ -161,6 +172,7 @@ final class AppSettings {
             "fontSize": 17.0, "lineHeight": 1.35, "paragraphSpacing": 6.0, "lineWidth": 720.0, "typewriter": false,
             "spellCheck": true, "dimMarkdown": true, "hideMarkdown": true, "sortOrder": "modified", "previewLines": 2, "showListImages": true,
             "appLock": false, "autoLockMinutes": 5, "keepTagsOnExport": true, "biometricUnlock": true,
+            "agentAccess": true, "agentsReadLockedNotes": false,
         ])
         lightThemeId = defaults.string(forKey: "lightTheme")!
         darkThemeId = defaults.string(forKey: "darkTheme")!
@@ -181,6 +193,8 @@ final class AppSettings {
         autoLockMinutes = defaults.integer(forKey: "autoLockMinutes")
         keepTagsOnExport = defaults.bool(forKey: "keepTagsOnExport")
         biometricUnlock = defaults.bool(forKey: "biometricUnlock")
+        agentAccess = defaults.bool(forKey: "agentAccess")
+        agentsReadLockedNotes = defaults.bool(forKey: "agentsReadLockedNotes")
     }
 
     func theme(dark: Bool) -> Theme {

@@ -14,13 +14,19 @@
 		0F3FE4AFDBEF85F58DD5DB28 /* iOSViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 348E23E94BAFB060E4DF82AA /* iOSViews.swift */; };
 		19A03C07A097153BF2702248 /* AxolotlApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D5E54F4609B518F1138FA8D /* AxolotlApp.swift */; };
 		1F08699DBA52F271918F7F28 /* Security.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E93DB4C8DA8275FF6B647F /* Security.swift */; };
+		20551022D8502DA4027253B3 /* NoteIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 748C06D78F2E8A35ECD8E258 /* NoteIntents.swift */; };
 		24964684066D2D567DCBA8BD /* SidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 322021725E46FD9A85300C3C /* SidebarView.swift */; };
 		26D3C11BF5FFE8C9B131AF8B /* EditorBreakdownTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D42E0F871C7A3A24524CD95 /* EditorBreakdownTests.swift */; };
+		293DF32C59AE7B77326D7035 /* axolotl-cli in Embed Dependencies */ = {isa = PBXBuildFile; fileRef = 231C32B4607CF0AD5DE84721 /* axolotl-cli */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		2BC0EE38891735F8B3794E3D /* MarkdownHighlighter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 089E7666C4BD0C5F071BE981 /* MarkdownHighlighter.swift */; };
 		2D9B8F5FB2C87D1E57DED376 /* EditorPerformanceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 683CB71048A6F18C8A739C61 /* EditorPerformanceTests.swift */; };
 		31C6AD8FF0DBD215E514C741 /* Security.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E93DB4C8DA8275FF6B647F /* Security.swift */; };
 		36F207CAC25618D113DB9E0F /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D3E404D3D4FA6249E379A92 /* RootView.swift */; };
+		422D8EC9E608400CCBB67ED9 /* AgentSocketServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B8C121340270346C241B019 /* AgentSocketServer.swift */; };
+		42F1F6981C36E897F462CFDB /* MCPSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C959FD3E36E2E4F596030B3 /* MCPSession.swift */; };
+		4740489BCE8235A75AF2E92F /* AgentSocketServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B8C121340270346C241B019 /* AgentSocketServer.swift */; };
 		4D8E353A772957F37F36D676 /* DemoLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24203415F5B05D3A164E8448 /* DemoLibrary.swift */; };
+		4F4F6BC5C83A099B24009DCD /* NoteIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 748C06D78F2E8A35ECD8E258 /* NoteIntents.swift */; };
 		51C29219FC193B79199F9660 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE53FC7008F44AE1D49BA776 /* SettingsView.swift */; };
 		57B13EB5CD414B6151A5E8EB /* ExportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85433EC6724D2B3A51B758A2 /* ExportService.swift */; };
 		5AEC4B8C9A6906B683DAED2D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6B2FC3E1C8473335DD3CDC9F /* Assets.xcassets */; };
@@ -33,16 +39,21 @@
 		778DCFE0492D535E698AD876 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE53FC7008F44AE1D49BA776 /* SettingsView.swift */; };
 		7B1337C037A556C8E54F071B /* AxolotlApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D5E54F4609B518F1138FA8D /* AxolotlApp.swift */; };
 		832DCD7EEB63C4C6A9F61778 /* DemoLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24203415F5B05D3A164E8448 /* DemoLibrary.swift */; };
+		891BAED273486564FFCF5034 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E9DBD8CC5B3F8B5FE302C91 /* main.swift */; };
 		89D06C628E2AE3A7FAE48C7D /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6999B1910336815B52722938 /* Theme.swift */; };
 		8C43C44F11F1C087B5FE3F51 /* MarkdownHighlighter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 089E7666C4BD0C5F071BE981 /* MarkdownHighlighter.swift */; };
 		8FD089D9DE94E2F2798D0661 /* QuickOpenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC6B1F2DC76EE9F3918E1DBB /* QuickOpenView.swift */; };
 		93FE7AC480EFD7B6AD086E24 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6999B1910336815B52722938 /* Theme.swift */; };
+		9FAD82057131AE692F5DD517 /* AgentToolTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB21940875AC9D83CE57488E /* AgentToolTests.swift */; };
 		A4AE8F0657164E02C45C1333 /* EditorScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2269DF5A7630468AF1CBA7A7 /* EditorScreen.swift */; };
+		A5CAF084C714E5F81B691552 /* AgentTools.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E34C42268877E0D72C6EDDF /* AgentTools.swift */; };
 		A61D0ECFF709AEDA3A207A74 /* EditorScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2269DF5A7630468AF1CBA7A7 /* EditorScreen.swift */; };
 		AA18E90D757DE8E2677E15CA /* NoteListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5997A5D49C88881FCEFF3EBD /* NoteListView.swift */; };
 		AAFDD7676494289689D9B1ED /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6B2FC3E1C8473335DD3CDC9F /* Assets.xcassets */; };
 		B671095AC069373F216B9B09 /* SidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 322021725E46FD9A85300C3C /* SidebarView.swift */; };
+		B94A11FA5034BECF91B847F6 /* MCPSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C959FD3E36E2E4F596030B3 /* MCPSession.swift */; };
 		BF50EA7C9EF5D22244C4A8AC /* MarkdownEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A718098C2E963DCE068D431 /* MarkdownEditor.swift */; };
+		C1CECD35F8E3493BC1F6D851 /* AgentTools.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E34C42268877E0D72C6EDDF /* AgentTools.swift */; };
 		C67CD89EF14C21312FE11224 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 11D295C7C90B02D84C9422DD /* PrivacyInfo.xcprivacy */; };
 		D0A151636D58A7C98931B727 /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7192BEAFCCDC9EAB94170D70 /* AppModel.swift */; };
 		DCD591CA2CCB7BE6787F6764 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D3E404D3D4FA6249E379A92 /* RootView.swift */; };
@@ -59,7 +70,28 @@
 			remoteGlobalIDString = 61AE20D5C3EED8FEC67F9DBC;
 			remoteInfo = "Axolotl-macOS";
 		};
+		64B0521EC94A0D5DE05F133A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 539D36E49EA0C9D33DEC41E8 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E9690020C1A4DB4DB1BC9B9F;
+			remoteInfo = "axolotl-cli";
+		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		6B4795BBC7892A4AE3E618A9 /* Embed Dependencies */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = Contents/Helpers;
+			dstSubfolderSpec = 1;
+			files = (
+				293DF32C59AE7B77326D7035 /* axolotl-cli in Embed Dependencies */,
+			);
+			name = "Embed Dependencies";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		089E7666C4BD0C5F071BE981 /* MarkdownHighlighter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownHighlighter.swift; sourceTree = "<group>"; };
@@ -67,10 +99,13 @@
 		0D5E54F4609B518F1138FA8D /* AxolotlApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AxolotlApp.swift; sourceTree = "<group>"; };
 		0DFCDC0E4F8E27040863DB68 /* AxolotlKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = AxolotlKit; path = Packages/AxolotlKit; sourceTree = SOURCE_ROOT; };
 		11D295C7C90B02D84C9422DD /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		1B8C121340270346C241B019 /* AgentSocketServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentSocketServer.swift; sourceTree = "<group>"; };
 		1D42E0F871C7A3A24524CD95 /* EditorBreakdownTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorBreakdownTests.swift; sourceTree = "<group>"; };
 		2269DF5A7630468AF1CBA7A7 /* EditorScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorScreen.swift; sourceTree = "<group>"; };
+		231C32B4607CF0AD5DE84721 /* axolotl-cli */ = {isa = PBXFileReference; includeInIndex = 0; path = "axolotl-cli"; sourceTree = BUILT_PRODUCTS_DIR; };
 		24203415F5B05D3A164E8448 /* DemoLibrary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoLibrary.swift; sourceTree = "<group>"; };
 		296B7D8BC98C7017233588B0 /* EditorCore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorCore.swift; sourceTree = "<group>"; };
+		2C959FD3E36E2E4F596030B3 /* MCPSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MCPSession.swift; sourceTree = "<group>"; };
 		322021725E46FD9A85300C3C /* SidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarView.swift; sourceTree = "<group>"; };
 		348E23E94BAFB060E4DF82AA /* iOSViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iOSViews.swift; sourceTree = "<group>"; };
 		36AFFD7885D789122E77FECF /* Axolotl-iOS.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = "Axolotl-iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -78,14 +113,18 @@
 		531D4E2FA4C971A25D3661F1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		5997A5D49C88881FCEFF3EBD /* NoteListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteListView.swift; sourceTree = "<group>"; };
 		5D2D8FD8BECDB17CB41059CE /* Platform.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Platform.swift; sourceTree = "<group>"; };
+		5E9DBD8CC5B3F8B5FE302C91 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		683CB71048A6F18C8A739C61 /* EditorPerformanceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorPerformanceTests.swift; sourceTree = "<group>"; };
 		6999B1910336815B52722938 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		6B2FC3E1C8473335DD3CDC9F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		70E93DB4C8DA8275FF6B647F /* Security.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Security.swift; sourceTree = "<group>"; };
 		7192BEAFCCDC9EAB94170D70 /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
+		748C06D78F2E8A35ECD8E258 /* NoteIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteIntents.swift; sourceTree = "<group>"; };
 		7D3E404D3D4FA6249E379A92 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		7E34C42268877E0D72C6EDDF /* AgentTools.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentTools.swift; sourceTree = "<group>"; };
 		85433EC6724D2B3A51B758A2 /* ExportService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportService.swift; sourceTree = "<group>"; };
 		AAD24FB40625DD41753EF28D /* Axolotl-macOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Axolotl-macOSTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		AB21940875AC9D83CE57488E /* AgentToolTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentToolTests.swift; sourceTree = "<group>"; };
 		BA58ED539F2E250DA30ED4A6 /* Axolotl-macOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Axolotl-macOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		D8842F2D9E22DB64111B325D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		EC6B1F2DC76EE9F3918E1DBB /* QuickOpenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickOpenView.swift; sourceTree = "<group>"; };
@@ -115,6 +154,7 @@
 		15F08EB25B41E9D9A3FB97D8 /* App */ = {
 			isa = PBXGroup;
 			children = (
+				43127D1B32A2F2DB2E086441 /* CLI */,
 				1CD59CD1EDD7E950EF8DF532 /* iOS */,
 				6AB9CC6F859A263F204C2247 /* macOS */,
 				8218E8035D935893A5E2F09A /* Shared */,
@@ -130,6 +170,14 @@
 				348E23E94BAFB060E4DF82AA /* iOSViews.swift */,
 			);
 			path = iOS;
+			sourceTree = "<group>";
+		};
+		43127D1B32A2F2DB2E086441 /* CLI */ = {
+			isa = PBXGroup;
+			children = (
+				5E9DBD8CC5B3F8B5FE302C91 /* main.swift */,
+			);
+			path = CLI;
 			sourceTree = "<group>";
 		};
 		4B48F1FFE0C49F0AAB1768BB /* Editor */ = {
@@ -171,6 +219,7 @@
 				11D295C7C90B02D84C9422DD /* PrivacyInfo.xcprivacy */,
 				70E93DB4C8DA8275FF6B647F /* Security.swift */,
 				6999B1910336815B52722938 /* Theme.swift */,
+				AA1FB5374420073EEB6AF061 /* Agent */,
 				4B48F1FFE0C49F0AAB1768BB /* Editor */,
 				92D2DC406201F586CC33A745 /* Views */,
 			);
@@ -193,11 +242,23 @@
 		A7C6714B870BE45C30A8B5BA /* Tests */ = {
 			isa = PBXGroup;
 			children = (
+				AB21940875AC9D83CE57488E /* AgentToolTests.swift */,
 				1D42E0F871C7A3A24524CD95 /* EditorBreakdownTests.swift */,
 				683CB71048A6F18C8A739C61 /* EditorPerformanceTests.swift */,
 				3722D1EC79CE4AD23F97CF58 /* ImportSecurityTests.swift */,
 			);
 			path = Tests;
+			sourceTree = "<group>";
+		};
+		AA1FB5374420073EEB6AF061 /* Agent */ = {
+			isa = PBXGroup;
+			children = (
+				1B8C121340270346C241B019 /* AgentSocketServer.swift */,
+				7E34C42268877E0D72C6EDDF /* AgentTools.swift */,
+				2C959FD3E36E2E4F596030B3 /* MCPSession.swift */,
+				748C06D78F2E8A35ECD8E258 /* NoteIntents.swift */,
+			);
+			path = Agent;
 			sourceTree = "<group>";
 		};
 		B4B47807895CBF530E0A6B29 /* Packages */ = {
@@ -211,6 +272,7 @@
 		D1F93E8C32B466294E26E099 /* Products */ = {
 			isa = PBXGroup;
 			children = (
+				231C32B4607CF0AD5DE84721 /* axolotl-cli */,
 				36AFFD7885D789122E77FECF /* Axolotl-iOS.app */,
 				BA58ED539F2E250DA30ED4A6 /* Axolotl-macOS.app */,
 				AAD24FB40625DD41753EF28D /* Axolotl-macOSTests.xctest */,
@@ -228,10 +290,12 @@
 				7309F42852A92FEA77E7D0AB /* Sources */,
 				0DE05FAF6E0B7F9C3E38071E /* Resources */,
 				A91C36F1599E3D68F5475D97 /* Frameworks */,
+				6B4795BBC7892A4AE3E618A9 /* Embed Dependencies */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				A6810235938519588F600178 /* PBXTargetDependency */,
 			);
 			name = "Axolotl-macOS";
 			packageProductDependencies = (
@@ -240,6 +304,23 @@
 			productName = "Axolotl-macOS";
 			productReference = BA58ED539F2E250DA30ED4A6 /* Axolotl-macOS.app */;
 			productType = "com.apple.product-type.application";
+		};
+		E9690020C1A4DB4DB1BC9B9F /* axolotl-cli */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BD780AFF3A92A85FC8B5701A /* Build configuration list for PBXNativeTarget "axolotl-cli" */;
+			buildPhases = (
+				D8210B035ECBB91703CCAD45 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "axolotl-cli";
+			packageProductDependencies = (
+			);
+			productName = "axolotl-cli";
+			productReference = 231C32B4607CF0AD5DE84721 /* axolotl-cli */;
+			productType = "com.apple.product-type.tool";
 		};
 		F03659CDC24E251CD7D937A1 /* Axolotl-iOS */ = {
 			isa = PBXNativeTarget;
@@ -292,6 +373,10 @@
 						DevelopmentTeam = 4F2YLTHL8T;
 						ProvisioningStyle = Manual;
 					};
+					E9690020C1A4DB4DB1BC9B9F = {
+						DevelopmentTeam = "";
+						ProvisioningStyle = Manual;
+					};
 					F03659CDC24E251CD7D937A1 = {
 						DevelopmentTeam = 4F2YLTHL8T;
 						ProvisioningStyle = Automatic;
@@ -321,6 +406,7 @@
 			targets = (
 				F03659CDC24E251CD7D937A1 /* Axolotl-iOS */,
 				61AE20D5C3EED8FEC67F9DBC /* Axolotl-macOS */,
+				E9690020C1A4DB4DB1BC9B9F /* axolotl-cli */,
 				F43700E15E76F522B20F3EC4 /* Axolotl-macOSTests */,
 			);
 		};
@@ -352,6 +438,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9FAD82057131AE692F5DD517 /* AgentToolTests.swift in Sources */,
 				26D3C11BF5FFE8C9B131AF8B /* EditorBreakdownTests.swift in Sources */,
 				2D9B8F5FB2C87D1E57DED376 /* EditorPerformanceTests.swift in Sources */,
 				6B578001E2D821F4ADCECD00 /* ImportSecurityTests.swift in Sources */,
@@ -362,14 +449,18 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4740489BCE8235A75AF2E92F /* AgentSocketServer.swift in Sources */,
+				C1CECD35F8E3493BC1F6D851 /* AgentTools.swift in Sources */,
 				D0A151636D58A7C98931B727 /* AppModel.swift in Sources */,
 				7B1337C037A556C8E54F071B /* AxolotlApp.swift in Sources */,
 				832DCD7EEB63C4C6A9F61778 /* DemoLibrary.swift in Sources */,
 				65DDD31BA5F870BB6365C384 /* EditorCore.swift in Sources */,
 				A61D0ECFF709AEDA3A207A74 /* EditorScreen.swift in Sources */,
 				57B13EB5CD414B6151A5E8EB /* ExportService.swift in Sources */,
+				B94A11FA5034BECF91B847F6 /* MCPSession.swift in Sources */,
 				F6F675FD9184744608395B6E /* MarkdownEditor.swift in Sources */,
 				8C43C44F11F1C087B5FE3F51 /* MarkdownHighlighter.swift in Sources */,
+				4F4F6BC5C83A099B24009DCD /* NoteIntents.swift in Sources */,
 				AA18E90D757DE8E2677E15CA /* NoteListView.swift in Sources */,
 				726B9EDB4EE66A1E40E8612E /* Platform.swift in Sources */,
 				8FD089D9DE94E2F2798D0661 /* QuickOpenView.swift in Sources */,
@@ -385,14 +476,18 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				422D8EC9E608400CCBB67ED9 /* AgentSocketServer.swift in Sources */,
+				A5CAF084C714E5F81B691552 /* AgentTools.swift in Sources */,
 				FDD6E577C45CD2D404B2CCC8 /* AppModel.swift in Sources */,
 				19A03C07A097153BF2702248 /* AxolotlApp.swift in Sources */,
 				4D8E353A772957F37F36D676 /* DemoLibrary.swift in Sources */,
 				5F8794A220B1FAE9502C7863 /* EditorCore.swift in Sources */,
 				A4AE8F0657164E02C45C1333 /* EditorScreen.swift in Sources */,
 				00567FEEEE1185906FAB80E3 /* ExportService.swift in Sources */,
+				42F1F6981C36E897F462CFDB /* MCPSession.swift in Sources */,
 				BF50EA7C9EF5D22244C4A8AC /* MarkdownEditor.swift in Sources */,
 				2BC0EE38891735F8B3794E3D /* MarkdownHighlighter.swift in Sources */,
+				20551022D8502DA4027253B3 /* NoteIntents.swift in Sources */,
 				0955ED1440B5C7B057D12AD9 /* NoteListView.swift in Sources */,
 				0A8DF8D0767689AC0C543209 /* Platform.swift in Sources */,
 				DF70F18D301319688E3C26D6 /* QuickOpenView.swift in Sources */,
@@ -405,9 +500,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		D8210B035ECBB91703CCAD45 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				891BAED273486564FFCF5034 /* main.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		A6810235938519588F600178 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E9690020C1A4DB4DB1BC9B9F /* axolotl-cli */;
+			targetProxy = 64B0521EC94A0D5DE05F133A /* PBXContainerItemProxy */;
+		};
 		D42793261089E3D645285B68 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 61AE20D5C3EED8FEC67F9DBC /* Axolotl-macOS */;
@@ -491,7 +599,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 4F2YLTHL8T;
 				ENABLE_NS_ASSERTIONS = NO;
@@ -507,7 +615,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.2.0;
+				MARKETING_VERSION = 1.3.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -536,6 +644,26 @@
 				SDKROOT = macosx;
 			};
 			name = Release;
+		};
+		2D4CD2E7D588F0105FEB7C8E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_HARDENED_RUNTIME = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.nearbycoder.axolotl.cli;
+				PRODUCT_MODULE_NAME = AxolotlCLI;
+				PRODUCT_NAME = axolotl;
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+			};
+			name = Debug;
 		};
 		361139E474C056900B8BAA0A /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -572,7 +700,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = 4F2YLTHL8T;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -594,7 +722,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.2.0;
+				MARKETING_VERSION = 1.3.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -665,6 +793,26 @@
 			};
 			name = Release;
 		};
+		D44FC6ABE798C2C8642B48E7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_HARDENED_RUNTIME = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.nearbycoder.axolotl.cli;
+				PRODUCT_MODULE_NAME = AxolotlCLI;
+				PRODUCT_NAME = axolotl;
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -682,6 +830,15 @@
 			buildConfigurations = (
 				1AA392560C158D59EF59A268 /* Debug */,
 				2B5D39570EF5BD6693FD35B5 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		BD780AFF3A92A85FC8B5701A /* Build configuration list for PBXNativeTarget "axolotl-cli" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2D4CD2E7D588F0105FEB7C8E /* Debug */,
+				D44FC6ABE798C2C8642B48E7 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;

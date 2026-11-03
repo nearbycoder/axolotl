@@ -68,6 +68,7 @@
     <nav class="nav-links" aria-label="Primary">
       <a href="#features">Features</a>
       <a href="#sync">Sync</a>
+      <a href="#agents">Agents</a>
       <a href="#download">Download</a>
       <a href="#faq">FAQ</a>
     </nav>
@@ -339,6 +340,35 @@
     </div>
   </section>
 
+  <section class="section" id="agents" style="padding-bottom:40px">
+    <div class="container feature">
+      <div class="copy reveal">
+        <div class="kicker">Agents</div>
+        <h2 class="display">Your notes, ready<br>for your <em>agents</em>.</h2>
+        <p class="lead">Anything you can do in Axolotl, an AI agent can do too. A built-in MCP server and command-line tool give Claude, Cursor and other agents 35 tools to search, write, tag, check off todos, restore versions and export. Siri and Shortcuts get the same actions on iPhone and iPad.</p>
+        <ul class="checks">
+          <li><svg><use href="#i-check"/></svg>Works with Claude Code, Claude Desktop, Cursor and any MCP client</li>
+          <li><svg><use href="#i-check"/></svg>A Claude Code plugin with a skill that knows your tags, todos and search syntax</li>
+          <li><svg><use href="#i-check"/></svg>Every agent edit is its own version, so it can always be undone</li>
+          <li><svg><use href="#i-check"/></svg>Locked notes stay private unless you say otherwise</li>
+        </ul>
+        <div class="cmd" style="margin-top:28px">/plugin install axolotl --marketplace nearbycoder/axolotl<button class="copy-btn" aria-label="Copy install command"><svg><use href="#i-copy"/></svg></button></div>
+      </div>
+      <div class="panel reveal">
+        <div class="agent-demo" aria-label="An example conversation with an AI agent using Axolotl">
+          <div class="agent-bar"><i></i><i></i><i></i><span>Claude Code</span></div>
+          <div class="agent-body">
+            <p class="you"><span>›</span> Add “call the venue” to my wedding checklist, then tell me what's still open.</p>
+            <p class="tool"><b>axolotl</b> search_notes <code>#wedding</code><em>1 note</em></p>
+            <p class="tool"><b>axolotl</b> add_todo <code>Wedding planning</code><em>added</em></p>
+            <p class="tool"><b>axolotl</b> list_todos <code>Wedding planning</code><em>3 open</em></p>
+            <p class="reply">Added it to <u>Wedding planning</u>. Still open: send invitations, order flowers and call the venue.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section class="section" id="download">
     <div class="container">
       <div class="section-head center reveal">
@@ -398,6 +428,7 @@ docker compose up -d<button class="copy-btn" aria-label="Copy commands"><svg><us
         <details><summary>How does sync work without an account?<svg><use href="#i-plus"/></svg></summary><p>Turning on sync creates a private sync code. Enter it or scan its QR code on your other devices. Devices on the same network then sync directly. To sync while apart, run the small open-source relay on any server. It only ever stores encrypted data.</p></details>
         <details><summary>What if I edit the same note on two devices?<svg><use href="#i-plus"/></svg></summary><p>Both edits are kept. Axolotl tracks each note's revision history and merges concurrent changes word by word. In the rare case that changes can't be merged, the other version is saved as a separate copy, so nothing is lost.</p></details>
         <details><summary>Why isn't it on the App Store yet?<svg><use href="#i-plus"/></svg></summary><p>Builds are published directly on GitHub for now. On iPhone and iPad, install it with AltStore, SideStore or Sideloadly, or build it from source in Xcode.</p></details>
+        <details><summary>Is it safe to let an AI agent use my notes?<svg><use href="#i-plus"/></svg></summary><p>Agents connect through the Axolotl app on your Mac, and only apps running as you can reach it. You can switch agent access off in <b>Settings → Agents</b>, which also lists every connected client and a log of what agents did. Each agent edit is saved as its own version you can restore, locked notes stay hidden unless you allow it, and agents can't change security settings.</p></details>
         <details><summary>Can I bring my notes from Bear or Obsidian?<svg><use href="#i-plus"/></svg></summary><p>Yes. Export as Markdown or TextBundle, then use <b>Import</b> in Settings. Tags, links, todos and images come along.</p></details>
       </div>
     </div>

@@ -1,0 +1,12 @@
+{
+  "name": "axolotl",
+  "description": "Plugins for Axolotl, the Markdown notes app for Mac, iPhone and iPad.",
+  "owner": { "name": "Josh Hamilton" },
+  "plugins": [
+    {
+      "name": "axolotl",
+      "source": "./plugins/axolotl",
+      "description": "Search, read, write and organize your Axolotl notes: an MCP server plus a skill that knows Axolotl's Markdown, tags, todos and search syntax."
+    }
+  ]
+}

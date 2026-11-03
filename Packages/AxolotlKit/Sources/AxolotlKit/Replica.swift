@@ -296,6 +296,16 @@ public final class Replica {
         return removed
     }
 
+    /// Freezes a note's current revision so the next edit starts a new one in history, instead of
+    /// being folded into an unsent revision. Used before automated edits so they can be undone.
+    public func checkpoint(_ noteId: String) {
+        let key = Key(entity: Entity.note, id: noteId, field: "body")
+        guard var cur = info[key], !cur.sent else { return }
+        cur.sent = true
+        info[key] = cur
+        try? db.run("UPDATE records SET sent=1 WHERE entity=? AND id=? AND field='body'", [.text(Entity.note), .text(noteId)])
+    }
+
     /// Records that `rows` left this device, which freezes local revisions against amendment.
     public func markSent(_ rows: [SyncRow]) {
         try? db.transaction {

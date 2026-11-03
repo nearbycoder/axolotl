@@ -100,7 +100,50 @@ final class AppModel {
 
     convenience init() { self.init(dataDirectory: Self.dataDirectory) }
 
+    /// The app's model. App Intents and the agent server use the same instance as the UI.
+    static let shared: AppModel = {
+        let model = AppModel()
+        model.updateAgentServer()
+        return model
+    }()
+
+    /// Recent actions taken by agents, newest first, shown in Settings → Agents.
+    private(set) var agentActivity: [AgentActivity] = []
+    private(set) var agentConnections = 0
+    @ObservationIgnored let dataDirectoryURL: URL
+    #if os(macOS)
+    @ObservationIgnored private var agentServer: AgentSocketServer?
+    #endif
+
+    func recordAgentActivity(_ tool: String, client: String, summary: String, failed: Bool) {
+        agentActivity.insert(AgentActivity(date: Date(), tool: tool, client: client, summary: summary, failed: failed), at: 0)
+        if agentActivity.count > 50 { agentActivity.removeLast(agentActivity.count - 50) }
+    }
+
+    func agentConnectionsChanged(_ count: Int) { agentConnections = count }
+
+    /// Starts or stops the local agent endpoint to match the setting.
+    func updateAgentServer() {
+        #if os(macOS)
+        if settings.agentAccess {
+            guard agentServer == nil else { return }
+            let server = AgentSocketServer(path: AgentSocketServer.socketPath(dataDirectory: dataDirectoryURL), model: self)
+            do {
+                try server.start()
+                agentServer = server
+            } catch {
+                errorMessage = "Couldn't start agent access: \(error.localizedDescription)"
+            }
+        } else {
+            agentServer?.stop()
+            agentServer = nil
+            agentConnections = 0
+        }
+        #endif
+    }
+
     init(dataDirectory: URL) {
+        dataDirectoryURL = dataDirectory
         let replica: Replica
         do {
             replica = try Replica(directory: dataDirectory)

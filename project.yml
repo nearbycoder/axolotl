@@ -11,8 +11,8 @@ packages:
     path: Packages/AxolotlKit
 settings:
   base:
-    MARKETING_VERSION: "1.2.0"
-    CURRENT_PROJECT_VERSION: "3"
+    MARKETING_VERSION: "1.3.0"
+    CURRENT_PROJECT_VERSION: "4"
     SWIFT_VERSION: "5.0"
     DEVELOPMENT_TEAM: 4F2YLTHL8T
     ENABLE_USER_SCRIPT_SANDBOXING: YES
@@ -69,6 +69,12 @@ targets:
       - App/macOS
     dependencies:
       - package: AxolotlKit
+      - target: axolotl-cli
+        embed: true
+        codeSign: true
+        copy:
+          destination: wrapper
+          subpath: Contents/Helpers
     info:
       path: App/macOS/Info.plist
       properties:
@@ -94,6 +100,21 @@ targets:
         CODE_SIGN_IDENTITY: "-"
         ENABLE_HARDENED_RUNTIME: YES
         COMBINE_HIDPI_IMAGES: YES
+  axolotl-cli:
+    type: tool
+    platform: macOS
+    sources:
+      - App/CLI
+    settings:
+      base:
+        PRODUCT_NAME: axolotl
+        PRODUCT_MODULE_NAME: AxolotlCLI
+        PRODUCT_BUNDLE_IDENTIFIER: com.nearbycoder.axolotl.cli
+        CODE_SIGN_STYLE: Manual
+        CODE_SIGN_IDENTITY: "-"
+        DEVELOPMENT_TEAM: ""
+        ENABLE_HARDENED_RUNTIME: YES
+        SKIP_INSTALL: YES
   Axolotl-macOSTests:
     type: bundle.unit-test
     platform: macOS
