@@ -27,7 +27,7 @@
           "date": "2026-11-03",
           "localizedDescription": "Agents: Siri, Shortcuts and Apple Intelligence can create, search, open and update notes and todos. On the Mac, an MCP server and the axolotl command let Claude, Cursor and other AI agents use every Axolotl feature.",
           "downloadURL": "https://github.com/nearbycoder/axolotl/releases/download/v1.3.0/Axolotl-iOS.ipa",
-          "size": 0,
+          "size": 3105179,
           "minOSVersion": "17.0"
         },
         {
